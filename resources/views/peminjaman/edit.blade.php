@@ -24,8 +24,9 @@
                             <select name="id_barang" class="form-control">
                                 @foreach ($barang as $item)
                                     <option value="{{ $item->id }}"
-                                        {{ $item->id == $peminjaman->id_barang ? 'selected' : '' }}>{{ $item->nama }}
-                                        - {{ $item->merek }}</option>
+                                        {{ $item->id == $peminjaman->id_barang ? 'selected' : '' }}>
+                                        {{ $item->nama }} - {{ $item->merek }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -35,7 +36,7 @@
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Jumlah</label>
                         <div class="col-sm-10">
-                            <input type="number" class="form-control" value="{{ $peminjaman->jumlah }}">
+                            <input type="number" class="form-control" name="jumlah" value="{{ old('jumlah', $peminjaman->jumlah) }}">
                         </div>
                     </div>
 
@@ -43,7 +44,7 @@
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Tanggal Pinjam</label>
                         <div class="col-sm-10">
-                            <input type="date" class="form-control" value="{{ $peminjaman->tanggal_pinjam }}">
+                            <input type="date" class="form-control" name="tanggal_pinjam" value="{{ old('tanggal_pinjam', $peminjaman->tanggal_pinjam) }}">
                         </div>
                     </div>
 
@@ -51,7 +52,7 @@
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Tanggal Kembali</label>
                         <div class="col-sm-10">
-                            <input type="date" class="form-control" value="{{ $peminjaman->tanggal_kembali }}">
+                            <input type="date" class="form-control" name="tanggal_kembali" value="{{ old('tanggal_kembali', $peminjaman->tanggal_kembali) }}">
                         </div>
                     </div>
 
@@ -59,7 +60,7 @@
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Nama Peminjam</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" value="{{ $peminjaman->nama_peminjam }}">
+                            <input type="text" class="form-control" name="nama_peminjam" value="{{ old('nama_peminjam', $peminjaman->nama_peminjam) }}">
                         </div>
                     </div>
 

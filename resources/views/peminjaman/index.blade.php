@@ -69,6 +69,11 @@
                                         <i class="bx bx-dots-vertical-rounded"></i>
                                     </button>
                                     <div class="dropdown-menu">
+                                        <!-- Tombol Detail -->
+                                        <a class="dropdown-item" href="{{ route('peminjaman.show', $item->id) }}">
+                                            <i class="bx bx-show-alt me-1"></i> Detail
+                                        </a>
+
                                        <!-- Tombol Edit -->
                                         <a class="dropdown-item" href="{{ route('peminjaman.edit', $item->id) }}">
                                             <i class="bx bx-edit-alt me-1"></i> Edit

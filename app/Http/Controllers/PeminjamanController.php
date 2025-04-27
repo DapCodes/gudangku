@@ -9,6 +9,9 @@ use App\Models\Barangs;
 
 use RealRashid\SweetAlert\Facades\Alert;
 
+use Carbon\Carbon;
+Carbon::setLocale('id');
+
 
 class PeminjamanController extends Controller
 {
@@ -96,7 +99,9 @@ class PeminjamanController extends Controller
      */
     public function show($id)
     {
-        //
+        $peminjaman = Peminjamans::findOrFail($id);
+        $barang = Barangs::findOrFail($peminjaman->id_barang);
+        return view('peminjaman.show', compact('peminjaman', 'barang'));
     }
 
     /**
@@ -130,42 +135,48 @@ class PeminjamanController extends Controller
 
         // Status pengembalian
         if ($request->status == "Sudah Dikembalikan") {
-            // Tambahkan stok barang lama
+            // Tambahkan stok barang lama terlebih dahulu
             $barangLama->stok += $peminjaman->jumlah;
             $barangLama->save();
         }
 
         // Logic perubahan saat update
-        if ($barangBaru->stok < $request->jumlah) {
+        $jumlahBaru = $request->jumlah; // Jumlah yang baru dimasukkan
+
+        if ($barangBaru->stok < $jumlahBaru) {
             Alert::warning('Warning', 'Stok Tidak Cukup')->autoClose(1500);
-            return redirect()->route('peminjaman.edit');
+            return redirect()->route('peminjaman.index');
         } else {
             // Jika barang berubah, kurangi stok barang lama dan tambah stok barang baru
-        if ($peminjaman->id_barang != $request->id_barang) {
-                // Kurangi stok barang lama
+            if ($peminjaman->id_barang != $request->id_barang) {
+                // Mengembalikan stok barang lama sebelum perubahan
                 $barangLama->stok += $peminjaman->jumlah;
                 $barangLama->save();
 
-                // Tambah stok barang baru
-                $barangBaru->stok -= $request->jumlah;
+                // Kurangi stok barang baru sesuai jumlah yang baru
+                $barangBaru->stok -= $jumlahBaru;
                 $barangBaru->save();
             } else {
                 // Jika barang tetap sama, cukup perbarui stok barang yang lama
-                $barangLama->stok -= $request->jumlah;
+                // Mengembalikan stok barang lama terlebih dahulu
+                $barangLama->stok += $peminjaman->jumlah;
+
+                // Mengurangi stok barang lama sesuai jumlah baru
+                $barangLama->stok -= $jumlahBaru;
                 $barangLama->save();
             }
         }
 
         // Update data peminjaman
+        // Pastikan update hanya dilakukan jika ada perubahan pada request
         $peminjaman->update($request->all());
 
         // Menampilkan pesan sukses
         Alert::success('Success', 'Data Berhasil Diubah')->autoClose(1500);
 
         return redirect()->route('peminjaman.index');
-
-    }   
-
+    }
+    
     /**
      * Remove the specified resource from storage.
      *
