@@ -58,8 +58,8 @@
                 </li>
 
                 <!-- Data Peminjaman -->
-                <li class="menu-item {{ Request::is('admin/peminjaman') ? 'active' : '' }}">
-                    <a href="{{ route('home') }}" class="menu-link">
+                <li class="menu-item {{ Request::is('admin/peminjaman*') ? 'active' : '' }}">
+                    <a href="{{ route('peminjaman.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-download"></i>
                         <div>Data Peminjaman</div>
                     </a>

@@ -48,7 +48,7 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Kode Barang</th>
+                        <th>Kode Barang Masuk</th>
                         <th>Nama Barang</th>
                         <th>Merek</th>
                         <th>Jumlah</th>

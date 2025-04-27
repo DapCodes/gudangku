@@ -7,6 +7,7 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\BarangMasukController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\BarangKeluarController;
+use App\Http\Controllers\PeminjamanController;
 
 // Middleware
 use App\Http\Middleware\RoleMiddleware;
@@ -50,8 +51,8 @@ route::prefix('admin')->middleware('auth', RoleMiddleware::class)->group(functio
     Route::get('brg-keluar-export', [BarangKeluarController::class, 'export'])->name('brg-keluar.export');
     Route::get('admin/brg-keluar-export-excel', [BarangKeluarController::class, 'exportExcel'])->name('brg-keluar.export.excel');
 
+    Route::resource('peminjaman', PeminjamanController::class);
 
-    Route::resource('peminjaman', BarangController::class);
     Route::resource('pengembalian', BarangController::class);
 
 });
