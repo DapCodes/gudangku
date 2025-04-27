@@ -1,0 +1,175 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
+use App\Exports\KaryawanExport;
+use RealRashid\SweetAlert\Facades\Alert;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+Carbon::setLocale('id');
+
+class KaryawanController extends Controller
+{
+     // cek auth
+     public function __construct()
+     {
+         $this->middleware('auth');
+     }
+
+    public function export()
+    {
+        $karyawan = User::where('is_admin', 0)->get();
+
+        $pdf = Pdf::loadView('pdf.karyawan', ['karyawan' => $karyawan]);
+
+        return $pdf->download('laporan-data-karyawan.pdf');
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new KaryawanExport, 'laporan-data-karyawan.xlsx');
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+        $keyword = $request->input('search');
+    
+        $users = User::where('is_admin', 0)
+                    ->when($keyword, function ($query) use ($keyword) {
+                        $query->where(function ($q) use ($keyword) {
+                            $q->where('name', 'like', "%$keyword%")
+                              ->orWhere('email', 'like', "%$keyword%");
+                        });
+                    })
+                    ->get();
+    
+        return view('karyawan.index', compact('users', 'keyword'));
+    }
+    
+
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('karyawan.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+        ]);
+
+        $user = new User();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = bcrypt($request->password);
+        $user->is_admin = 0; // Set is_admin to 0 for regular users
+        $user->save();
+
+        Alert::success('Berhasil!', 'Data Berhasil Ditambahkan');
+        return redirect()->route('karyawan.index');
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        $karyawan = User::findOrFail($id);
+        return view('karyawan.edit', compact('karyawan'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+
+     public function update(Request $request, $id)
+     {
+         $user = User::findOrFail($id);
+     
+         // Validasi input (password tidak wajib diisi)
+         $request->validate([
+             'name' => 'required|string|max:255',
+             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+             'current_password' => 'required',
+             'password' => 'nullable|string|min:6|confirmed',
+         ]);
+     
+         // Cek apakah password lama benar
+         if (!Hash::check($request->current_password, $user->password)) {
+             return back()->withErrors(['current_password' => 'Password lama tidak sesuai.']);
+         }
+     
+         // Update data
+         $user->name = $request->name;
+         $user->email = $request->email;
+     
+         // Hanya update password jika field password diisi
+         if ($request->filled('password')) {
+             $user->password = Hash::make($request->password);
+         }
+     
+         $user->save();
+     
+         Alert::success('Berhasil!', 'Data Berhasil Diubah');
+         return redirect()->route('karyawan.index');
+     }
+     
+
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        Alert::success('Berhasil!', 'Data Berhasil Dihapus');
+        return redirect()->route('karyawan.index');
+    }
+}
