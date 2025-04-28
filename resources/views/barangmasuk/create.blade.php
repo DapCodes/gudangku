@@ -18,21 +18,34 @@
                 <form action="{{ route('brg-masuk.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">ID Barang</label>
+                        <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Pilih Barang</label>
                         <div class="col-sm-10">
-                            <div class="input-group input-group-merge">
-                                <span id="basic-icon-default-fullname2" class="input-group-text"><i
-                                        class="bx bx-collection"></i></span>
-                                <select name="id_barang" class="form-control">
-                                    <option value="">Pilih Barang</option>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownBarang" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Pilih Barang
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownBarang" style="width: 100%;">
                                     @foreach ($barang as $item)
-                                        <option value="{{ $item->id }}">{{ $item->nama }} - {{ $item->merek }}
-                                        </option>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-start" href="#" onclick="pilihBarang('{{ $item->id }}', '{{ $item->nama }}')">
+                                            <img src="{{ asset('image/barang/' . $item->foto) }}" alt="{{ $item->nama }}" width="50" height="50" class="me-3 rounded">
+                                            <div class="flex-grow-1">
+                                                <div><strong>{{ $item->nama }}</strong> - {{ $item->merek }}</div>
+                                                <small class="text-muted">Stok: {{ $item->stok }}</small>
+                                            </div>
+                                        </a>
+                                        <hr class="my-1">
+                                    </li>
                                     @endforeach
-                                </select>
+                                </ul>
                             </div>
+
+                            <!-- Ini penting -->
+                            <input type="hidden" name="id_barang" id="id_barang">
+
                         </div>
                     </div>
+
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Jumlah</label>
                         <div class="col-sm-10">

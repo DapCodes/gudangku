@@ -8,6 +8,8 @@ use App\Http\Controllers\BarangMasukController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\BarangKeluarController;
 use App\Http\Controllers\PeminjamanController;
+use App\Http\Controllers\PengembalianController;
+use App\Http\Controllers\HomeController;
 
 // Middleware
 use App\Http\Middleware\RoleMiddleware;
@@ -23,36 +25,53 @@ use App\Http\Middleware\RoleMiddleware;
 |
 */
 
+
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
-Auth::routes();
+// Logout route
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/');
+})->name('logout');
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
+// Disable registration
+Auth::routes(['register' => false]);
 
 // Role Admin
-route::prefix('admin')->middleware('auth', RoleMiddleware::class)->group(function() {
+Route::prefix('admin')->middleware('auth', RoleMiddleware::class)->group(function() {
 
+    // Admin Home route (changed from resource)
+    Route::get('home', [HomeController::class, 'index'])->name('admin.home');
+
+    // Barang Routes
     Route::resource('barang', BarangController::class);
     Route::get('barang-export', [BarangController::class, 'export'])->name('barang.export');
     Route::get('admin/barang-export-excel', [BarangController::class, 'exportExcel'])->name('barang.export.excel');
 
+    // Barang Masuk Routes
     Route::resource('brg-masuk', BarangMasukController::class);
     Route::get('brg-masuk-export', [BarangMasukController::class, 'export'])->name('brg-masuk.export');
     Route::get('admin/brg-masuk-export-excel', [BarangMasukController::class, 'exportExcel'])->name('brg-masuk.export.excel');
 
+    // Karyawan Routes
     Route::resource('karyawan', KaryawanController::class);
     Route::get('karyawan-export', [KaryawanController::class, 'export'])->name('karyawan.export');
     Route::get('admin/karyawan-export-excel', [KaryawanController::class, 'exportExcel'])->name('karyawan.export.excel');
 
+    // Barang Keluar Routes
     Route::resource('brg-keluar', BarangKeluarController::class);
     Route::get('brg-keluar-export', [BarangKeluarController::class, 'export'])->name('brg-keluar.export');
     Route::get('admin/brg-keluar-export-excel', [BarangKeluarController::class, 'exportExcel'])->name('brg-keluar.export.excel');
 
+    // Peminjaman Routes
     Route::resource('peminjaman', PeminjamanController::class);
+    Route::get('peminjaman-export', [PeminjamanController::class, 'export'])->name('peminjaman.export');
+    Route::get('admin/peminjaman-export-excel', [PeminjamanController::class, 'exportExcel'])->name('peminjaman.export.excel');
 
-    Route::resource('pengembalian', BarangController::class);
-
+    // Pengembalian Routes
+    Route::resource('pengembalian', PengembalianController::class);
+    Route::get('pengembalian-export', [PengembalianController::class, 'export'])->name('pengembalian.export');
+    Route::get('admin/pengembalian-export-excel', [PengembalianController::class, 'exportExcel'])->name('pengembalian.export.excel');
 });

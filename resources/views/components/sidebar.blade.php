@@ -16,8 +16,8 @@
             <ul class="menu-inner py-1">
                 <!-- Dashboard -->
                 <!-- Dashboard -->
-                <li class="menu-item {{ Request::is('home') ? 'active' : '' }}">
-                    <a href="{{ route('home') }}" class="menu-link">
+                <li class="menu-item {{ Request::is('admin/home*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.home') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-home-circle"></i>
                         <div>Dasbor</div>
                     </a>
@@ -66,8 +66,8 @@
                 </li>
 
                 <!-- Data Pengembalian -->
-                <li class="menu-item {{ Request::is('admin/pengembalian') ? 'active' : '' }}">
-                    <a href="{{ route('home') }}" class="menu-link">
+                <li class="menu-item {{ Request::is('admin/pengembalian*') ? 'active' : '' }}">
+                    <a href="{{ route('pengembalian.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-undo"></i>
                         <div>Data Pengembalian</div>
                     </a>

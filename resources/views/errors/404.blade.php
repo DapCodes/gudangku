@@ -49,7 +49,7 @@
         <div class="misc-wrapper">
             <h2 class="mb-2 mx-2">Halaman Tidak Ditemukan :(</h2>
             <p class="mb-4 mx-2">Oops! 😖 Halaman yang anda ketikan di URL tidak ada!</p>
-            <a href="{{ route('home') }}" class="btn btn-primary">Kembali ke Dashboard ?</a>
+            <a href="{{ route('admin.home') }}" class="btn btn-primary">Kembali ke Dashboard ?</a>
             <div class="mt-3">
                 <img src="{{ asset('admin/assets/img/illustrations/page-misc-error-light.png') }}"
                     alt="page-misc-error-light" width="500" class="img-fluid"

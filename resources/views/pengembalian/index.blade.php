@@ -1,24 +1,24 @@
 @extends('layouts.admin')
-@section('page-title', 'Data Peminjaman')
+@section('page-title', 'Data Pengembalian')
 
 @section('content')
     @include('sweetalert::alert')
     <div class="card">
         <div class="px-3 py-3 d-flex justify-content-between">
             <div>
-                <a href="{{ route('peminjaman.create') }}">
+                <a href="{{ route('pengembalian.create') }}">
                     <button type="button" class="btn btn-primary">
                         <i class="bx bx-folder-plus" style="position: relative; bottom: 2px;"></i>
                         Tambah Data
                     </button>
                 </a>
-                <a href="{{ route('peminjaman.export') }}">
+                <a href="{{ route('pengembalian.export') }}">
                     <button type="button" class="btn btn-danger">
                         <i class="bx bx-file" style="position: relative; bottom: 2px;"></i>
                         Buat PDF
                     </button>
                 </a>
-                <a href="{{ route('peminjaman.export.excel') }}">
+                <a href="{{ route('pengembalian.export.excel') }}">
                     <button type="button" class="btn btn-success">
                         <i class="bx bx-file" style="position: relative; bottom: 2px;"></i>
                         Buat Excel
@@ -28,14 +28,14 @@
             <div class="d-flex align-items-center border-start ps-3">
                 <i class="bx bx-search fs-4 lh-0 me-2"></i>
 
-                <form action="{{ route('peminjaman.index') }}" method="get" class="d-flex align-items-center gap-2">
+                <form action="{{ route('pengembalian.index') }}" method="get" class="d-flex align-items-center gap-2">
                     <input type="text" name="search" class="form-control border-0 shadow-none" placeholder="Cari..."
                         aria-label="Cari..." value="{{ request('search') }}" />
 
                     <button class="btn btn-primary" type="submit">Cari</button>
 
                     @if (request()->has('search') && request()->search != '')
-                        <a href="{{ route('peminjaman.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('pengembalian.index') }}" class="btn btn-secondary">
                             <i class="bx bx-refresh"></i>
                         </a>
                     @endif
@@ -48,7 +48,7 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Kode Peminjaman</th>
+                        <th>Kode pengembalian</th>
                         <th>Nama Barang</th>
                         <th>Kode Barang</th>
                         <th>Jumlah</th>
@@ -60,7 +60,7 @@
                     </tr>
                 </thead>
                 <tbody class="table-border-bottom-0">
-                    @foreach ($peminjaman as $item)
+                    @foreach ($pengembalian as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->kode_barang }}</td>
@@ -81,14 +81,9 @@
                                     </button>
                                     <div class="dropdown-menu">
                                         <!-- Tombol Detail -->
-                                        <a class="dropdown-item" href="{{ route('peminjaman.show', $item->id) }}">
+                                        <a class="dropdown-item" href="{{ route('pengembalian.show', $item->id) }}">
                                             <i class="bx bx-show-alt me-1"></i> Detail
-                                        </a>
-
-                                       <!-- Tombol Edit -->
-                                        <a class="dropdown-item" href="{{ route('peminjaman.edit', $item->id) }}">
-                                            <i class="bx bx-edit-alt me-1"></i> Edit
-                                        </a>
+                                        </a>        
 
                                         <!-- Form Delete (Disembunyikan) -->
                                         <form id="form-delete-{{ $item->id }}"

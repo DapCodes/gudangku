@@ -63,7 +63,7 @@
         <div class="misc-wrapper">
             <h2 class="mb-2 mx-2">Akses Tidak Tersedia</h2>
             <p class="mb-4 mx-2">Maaf halaman ini hanya bisa di akses oleh admin!</p>
-            <a href="{{ route('home') }}" class="btn btn-primary">Kembali ke Dashboard ?</a>
+            <a href="{{ route('admin.home') }}" class="btn btn-primary">Kembali ke Dashboard ?</a>
             <div class="mt-4">
                 <img src="{{ asset('/admin/assets/img/illustrations/girl-doing-yoga-light.png') }}"
                     alt="girl-doing-yoga-light" width="500" class="img-fluid"

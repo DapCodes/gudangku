@@ -184,6 +184,11 @@
                 }
             });
         }
+
+        function pilihBarang(id, nama) {
+            document.getElementById('id_barang').value = id; // set id_barang hidden
+            document.getElementById('dropdownBarang').innerText = nama; // ganti teks tombol jadi nama barang
+        }
     </script>
 
 </body>

@@ -6,15 +6,38 @@ use Illuminate\Http\Request;
 
 use App\Models\Peminjamans;
 use App\Models\Barangs;
+use App\Exports\PeminjamanExport;
+use App\Models\Pengembalians;
 
 use RealRashid\SweetAlert\Facades\Alert;
 
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 Carbon::setLocale('id');
 
 
 class PeminjamanController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    public function export()
+    {
+        $peminjaman = Peminjamans::with('barang')->where('status', 'Sedang Dipinjam')->get();
+
+        $pdf = Pdf::loadView('pdf.peminjaman', ['peminjaman' => $peminjaman]);
+
+        return $pdf->download('laporan-data-peminjaman.pdf');
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new PeminjamanExport, 'laporan-data-peminjaman.xlsx');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -129,53 +152,79 @@ class PeminjamanController extends Controller
     {
         $peminjaman = Peminjamans::findOrFail($id);
 
-        // Ambil barang lama dan barang baru
         $barangLama = Barangs::findOrFail($peminjaman->id_barang);
         $barangBaru = Barangs::findOrFail($request->id_barang);
 
-        // Status pengembalian
+        // Jika status menjadi "Sudah Dikembalikan"
         if ($request->status == "Sudah Dikembalikan") {
-            // Tambahkan stok barang lama terlebih dahulu
+            // Tambahkan stok barang lama
             $barangLama->stok += $peminjaman->jumlah;
             $barangLama->save();
+
+            // Buat record di tabel pengembalian
+            $lastRecord = Pengembalians::latest('id')->first();
+            $lastId = $lastRecord ? $lastRecord->id : 0;
+            $kodeBarang = 'BB-' . str_pad($lastId + 1, 4, '0', STR_PAD_LEFT);
+
+            $pengembalian = new Pengembalians();
+            $pengembalian->kode_barang = $kodeBarang;
+            $pengembalian->jumlah = $peminjaman->jumlah;
+            $pengembalian->tanggal_kembali = $request->tanggal_kembali;
+            $pengembalian->nama_peminjam = $peminjaman->nama_peminjam;
+            $pengembalian->status = $request->status;
+            $pengembalian->id_peminjam = $peminjaman->id;
+            $pengembalian->id_barang = $peminjaman->id_barang;
+            $pengembalian->save();
+
+            // Update status peminjaman menjadi "Sudah Dikembalikan"
+            $peminjaman->status = 'Sudah Dikembalikan';
+            $peminjaman->save();
+
+            Alert::success('Success', 'Data Berhasil Dikembalikan')->autoClose(1500);
+            return redirect()->route('peminjaman.index');
         }
 
-        // Logic perubahan saat update
-        $jumlahBaru = $request->jumlah; // Jumlah yang baru dimasukkan
+        // Jika status masih "Sedang Dipinjam"
+        if ($request->status == "Sedang Dipinjam") {
+            $jumlahBaru = $request->jumlah;
 
-        if ($barangBaru->stok < $jumlahBaru) {
-            Alert::warning('Warning', 'Stok Tidak Cukup')->autoClose(1500);
-            return redirect()->route('peminjaman.index');
-        } else {
-            // Jika barang berubah, kurangi stok barang lama dan tambah stok barang baru
+            if ($barangBaru->stok < $jumlahBaru) {
+                Alert::warning('Warning', 'Stok Tidak Cukup')->autoClose(1500);
+                return redirect()->route('peminjaman.index');
+            }
+
             if ($peminjaman->id_barang != $request->id_barang) {
-                // Mengembalikan stok barang lama sebelum perubahan
+                // Barang dipinjam berubah
                 $barangLama->stok += $peminjaman->jumlah;
                 $barangLama->save();
 
-                // Kurangi stok barang baru sesuai jumlah yang baru
                 $barangBaru->stok -= $jumlahBaru;
                 $barangBaru->save();
             } else {
-                // Jika barang tetap sama, cukup perbarui stok barang yang lama
-                // Mengembalikan stok barang lama terlebih dahulu
+                // Barang sama, update stok
                 $barangLama->stok += $peminjaman->jumlah;
-
-                // Mengurangi stok barang lama sesuai jumlah baru
                 $barangLama->stok -= $jumlahBaru;
                 $barangLama->save();
             }
+
+            // Update data peminjaman
+            $peminjaman->update([
+                'id_barang' => $request->id_barang,
+                'jumlah' => $request->jumlah,
+                'tanggal_pinjam' => $request->tanggal_pinjam,
+                'status' => $request->status,
+                'nama_peminjam' => $request->nama_peminjam,
+            ]);
+
+            Alert::success('Success', 'Data Berhasil Diubah')->autoClose(1500);
+            return redirect()->route('peminjaman.index');
         }
 
-        // Update data peminjaman
-        // Pastikan update hanya dilakukan jika ada perubahan pada request
-        $peminjaman->update($request->all());
-
-        // Menampilkan pesan sukses
-        Alert::success('Success', 'Data Berhasil Diubah')->autoClose(1500);
-
+        // Jika status tidak valid
+        Alert::error('Error', 'Status tidak valid')->autoClose(1500);
         return redirect()->route('peminjaman.index');
     }
+
     
     /**
      * Remove the specified resource from storage.
@@ -185,6 +234,17 @@ class PeminjamanController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $peminjaman = Peminjamans::findOrFail($id);
+        $barang = Barangs::findOrFail($peminjaman->id_barang);
+
+        if ($peminjaman->status == "Sedang Dipinjam") {
+            Alert::warning('Warning', 'Data Tidak Bisa Dihapus')->autoClose(2500);
+            return redirect()->route('peminjaman.index');
+        }
+        // Hapus data peminjaman
+        $peminjaman->delete();
+
+        Alert::success('Success', 'Data Berhasil Dihapus')->autoClose(2500);
+        return redirect()->route('pengembalian.index');
     }
 }
