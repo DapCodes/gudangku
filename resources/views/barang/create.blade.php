@@ -86,7 +86,7 @@
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Status Petugas</label>
                         <div class="col-sm-10">
                                 <div class="input-group input-group-merge">
-                                    <select name="status_user" id="status_user" class="form-control @error('status_user') is-invalid @enderror">
+                                    <select name="status_barang" id="status_barang" class="form-control">
                                         <option>Pilih Status Barang</option>
                                             <option value="RPL">Barang RPL</option>
                                             <option value="TBSM">Barang TBSM</option>
