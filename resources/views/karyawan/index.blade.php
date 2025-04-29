@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('page-title', 'Data Karyawan')
+@section('page-title', 'Data Petugas')
 
 @section('content')
     @include('sweetalert::alert')

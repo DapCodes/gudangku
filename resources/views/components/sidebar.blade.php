@@ -36,7 +36,7 @@
                     <li class="menu-item {{ Request::is('admin/karyawan*') ? 'active' : '' }}">
                         <a href="{{ route('karyawan.index') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-user"></i>
-                            <div>Data Karyawan</div>
+                            <div>Data Petugas</div>
                         </a>
                     </li>
                 @endif

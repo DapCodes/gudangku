@@ -1,12 +1,12 @@
 @extends('layouts.admin')
-@section('page-title', 'Data Karyawan / Tambah')
+@section('page-title', 'Data Petugas / Tambah')
 
 @section('content')
 
     <div class="col-xxl">
         <div class="card mb-4">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Tambah data karyawan</h5>
+                <h5 class="mb-0">Tambah data Petugas</h5>
                 <a href="{{ route('karyawan.index') }}">
                     <button class="btn btn-outline-secondary">
                         Kembali

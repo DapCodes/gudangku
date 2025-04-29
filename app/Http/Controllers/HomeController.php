@@ -26,8 +26,8 @@ class HomeController extends Controller
         $barangKeluar = BarangKeluars::count();
 
         $chartData = [
-            'labels' => ['Barang', 'Peminjaman', 'Pengembalian', 'Karyawan', 'Barang Masuk', 'Barang Keluar'],
-            'series' => [$barang, $peminjaman, $pengembalian, $karyawan, $barangMasuk, $barangKeluar]
+            'labels' => ['Barang', 'Petugas', 'Barang Masuk', 'Barang Keluar', 'Peminjaman', 'Pengembalian'],
+            'series' => [$barang, $karyawan, $barangMasuk, $barangKeluar, $peminjaman, $pengembalian]
         ];
 
         return view('home', compact('chartData', 'barang', 'peminjaman', 'pengembalian', 'karyawan', 'barangMasuk', 'barangKeluar'));

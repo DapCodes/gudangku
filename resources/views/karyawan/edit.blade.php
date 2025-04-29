@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('page-title', 'Data Karyawan / Ubah')
+@section('page-title', 'Data Petugas / Ubah')
 
 @section('content')
 
