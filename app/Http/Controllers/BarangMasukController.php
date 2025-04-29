@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Http\Request;
 use App\Models\Barangs;
@@ -25,6 +26,8 @@ class BarangMasukController extends Controller
 
     public function index(Request $request)
     {
+        $user = Auth::user(); // Ambil user yang sedang login
+
         $keyword = $request->input('search');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
@@ -33,7 +36,7 @@ class BarangMasukController extends Controller
             ->when($keyword, function ($query) use ($keyword) {
                 $query->whereHas('barang', function ($q) use ($keyword) {
                     $q->where('nama', 'like', "%$keyword%")
-                      ->orWhere('merek', 'like', "%$keyword%");
+                    ->orWhere('merek', 'like', "%$keyword%");
                 });
             })
             ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
@@ -44,24 +47,32 @@ class BarangMasukController extends Controller
             })
             ->when(!$startDate && $endDate, function ($query) use ($endDate) {
                 $query->whereDate('tanggal_masuk', '<=', $endDate);
+            })
+            ->when($user->status_user !== 'admin', function ($query) use ($user) {
+                $query->whereHas('barang', function ($q) use ($user) {
+                    $q->where('status_barang', $user->status_user);
+                });
             });
 
-        $barangMasuk = $query->get();
+        // Untuk export, ambil semua data
+        $barangMasukForExport = $query->get();
 
-        // Kalau tombol export ditekan
         if ($request->has('export')) {
             if ($request->export == 'excel') {
-                return Excel::download(new BarangMasukExport($barangMasuk), 'laporan-data-barangMasuk.xlsx');
+                return Excel::download(new BarangMasukExport($barangMasukForExport), 'laporan-data-barangMasuk.xlsx');
             } elseif ($request->export == 'pdf') {
-                $pdf = Pdf::loadView('pdf.barangMasuk', ['barangMasuk' => $barangMasuk]);
+                $pdf = Pdf::loadView('pdf.barangMasuk', ['barangMasuk' => $barangMasukForExport]);
                 return $pdf->download('laporan-data-barangMasuk.pdf');
             }
         }
 
+        // Jika tidak export, tampilkan dengan paginate
         $barangMasuk = $query->paginate(10)->withQueryString();
 
         return view('barangmasuk.index', compact('barangMasuk', 'keyword', 'startDate', 'endDate'));
     }
+
+
     
 
     /**
@@ -71,7 +82,13 @@ class BarangMasukController extends Controller
      */
     public function create()
     {
-        $barang = Barangs::all();
+        $user = Auth::user();
+        if ($user->status_user === 'admin') {
+            $barang = Barangs::all(); 
+        } else {
+            $barang = Barangs::where('status_barang', $user->status_user)->get();
+        }
+
         return view('barangmasuk.create', compact('barang'));
     }
 
@@ -143,8 +160,15 @@ class BarangMasukController extends Controller
      */
     public function edit($id)
     {
-        $barangMasuk = BarangMasuks::findOrFail($id);
-        $barang = Barangs::all();
+        $user = Auth::user();
+        if ($user->status_user === 'admin') {
+            $barangMasuk = BarangMasuks::findOrFail($id);
+            $barang = Barangs::all();
+        } else {
+            $barangMasuk = BarangMasuks::findOrFail($id);
+            $barang = Barangs::where('status_barang', $user->status_user)->get();
+        }
+
         return view('barangmasuk.edit', compact('barangMasuk', 'barang'));
     }
 

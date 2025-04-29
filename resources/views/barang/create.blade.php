@@ -25,13 +25,13 @@
                                 <input name="nama" type="text" class="form-control" id="basic-icon-default-fullname"
                                     placeholder="Handphone" aria-label="Handphone"
                                     aria-describedby="basic-icon-default-fullname2" />
+                            </div>
+                            @error('nama')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
                                 </div>
-                                @error('nama')
-                                    <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
-                                        <i class="bx bx-error-circle"></i>
-                                        <p>{{ $message }}</p>
-                                    </div>
-                                @enderror
+                            @enderror
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -58,8 +58,7 @@
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text"><i class="bx bx-image-add"></i></span>
                                 <input type="file" name="foto" id="basic-icon-default-phone"
-                                    class="form-control phone-mask"
-                                    aria-describedby="basic-icon-default-phone2" />
+                                    class="form-control phone-mask" aria-describedby="basic-icon-default-phone2" />
                             </div>
                             @error('foto')
                                 <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
@@ -82,25 +81,25 @@
                         <input type="text" name="status_barang" id="status_barang" value="TKRO" hidden>
                     @endif
                     @if ($status == 'admin')
-                    <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Status Petugas</label>
-                        <div class="col-sm-10">
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Status Petugas</label>
+                            <div class="col-sm-10">
                                 <div class="input-group input-group-merge">
                                     <select name="status_barang" id="status_barang" class="form-control">
                                         <option>Pilih Status Barang</option>
-                                            <option value="RPL">Barang RPL</option>
-                                            <option value="TBSM">Barang TBSM</option>
-                                            <option value="TKRO">Barang TKRO</option>
+                                        <option value="RPL">Barang RPL</option>
+                                        <option value="TBSM">Barang TBSM</option>
+                                        <option value="TKRO">Barang TKRO</option>
                                     </select>
                                 </div>
-                            @error('status_user')
-                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
-                                    <i class="bx bx-error-circle"></i>
-                                    <p>{{ $message }}</p>
-                                </div>
-                            @enderror
+                                @error('status_user')
+                                    <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                        <i class="bx bx-error-circle"></i>
+                                        <p>{{ $message }}</p>
+                                    </div>
+                                @enderror
+                            </div>
                         </div>
-                    </div>
                     @endif
                     <div class="row justify-content-end">
                         <div class="col-sm-10">

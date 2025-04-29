@@ -20,19 +20,41 @@
                     @csrf
                     @method('PUT')
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">ID Barang</label>
+                        <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Pilih Barang</label>
                         <div class="col-sm-10">
-                            <div class="input-group input-group-merge">
-                                <span id="basic-icon-default-fullname2" class="input-group-text"><i
-                                        class="bx bx-collection"></i></span>
-                                <select name="id_barang" class="form-control">
+                            <div class="dropdown">
+                                <button style="text-align: left;" class="w-100 btn btn-outline-secondary dropdown-toggle"
+                                    type="button" id="dropdownBarang" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i style="position: relative; right: 8px; bottom: 2px;" class="bx bx-box"></i>
+                                    Pilih Barang
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownBarang" style="width: 100%;">
                                     @foreach ($barang as $item)
-                                        <option value="{{ $item->id }}"
-                                            {{ $item->id == $barangKeluar->id_barang ? 'selected' : '' }}>
-                                            {{ $item->nama }} - {{ $item->merek }}</option>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-start" href="#"
+                                                onclick="pilihBarang('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->merek }}')">
+                                                <img src="{{ asset('image/barang/' . $item->foto) }}"
+                                                    alt="{{ $item->nama }}" width="50" height="50"
+                                                    class="me-3 rounded">
+                                                <div class="flex-grow-1">
+                                                    <div><strong>{{ $item->nama }}</strong> - {{ $item->merek }}</div>
+                                                    <small class="text-muted">Stok: {{ $item->stok }}</small>
+                                                </div>
+                                            </a>
+                                            <hr class="my-1">
+                                        </li>
                                     @endforeach
-                                </select>
+                                </ul>
+                                @error('id_barang')
+                                    <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                        <i class="bx bx-error-circle"></i>
+                                        <p>{{ $message }}</p>
+                                    </div>
+                                @enderror
                             </div>
+
+                            <input type="hidden" name="id_barang" id="id_barang">
+
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -97,3 +119,31 @@
         </div>
     </div>
 @endsection
+
+@isset($barangKeluar)
+    @php
+        $selectedBarangId = old('id_barang', $barangKeluar->id_barang);
+        $selectedBarang = $barang->firstWhere('id', $selectedBarangId);
+    @endphp
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectedId = '{{ $selectedBarangId }}';
+            const dropdownBtn = document.getElementById('dropdownBarang');
+            const inputIdBarang = document.getElementById('id_barang');
+
+            if (selectedId) {
+                inputIdBarang.value = selectedId;
+                dropdownBtn.innerHTML = `
+                    <i style="position: relative; right: 8px; bottom: 2px;" class="bx bx-box"></i>
+                    {{ $selectedBarang ? $selectedBarang->nama . ' - ' . $selectedBarang->merek : 'Pilih Barang' }}`;
+            }
+        });
+
+        function pilihBarang(id, nama, merek) {
+            document.getElementById('id_barang').value = id;
+            document.getElementById('dropdownBarang').innerHTML =
+                `<i style="position: relative; right: 8px; bottom: 2px;" class="bx bx-box"></i> ${nama} - ${merek}`;
+        }
+    </script>
+@endisset

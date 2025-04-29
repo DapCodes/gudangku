@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 use App\Models\Peminjamans;
 use App\Models\Barangs;
@@ -33,10 +34,13 @@ class PeminjamanController extends Controller
      */
     public function index(Request $request)
     {
+        $user = Auth::user();
+        
         $keyword = $request->input('search');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-
+        $exportType = $request->input('export');
+    
         $query = Peminjamans::with('barang')
             ->where('status', 'Sedang Dipinjam')
             ->when($keyword, function ($query) use ($keyword) {
@@ -53,25 +57,32 @@ class PeminjamanController extends Controller
             })
             ->when(!$startDate && $endDate, function ($query) use ($endDate) {
                 $query->whereDate('tanggal_pinjam', '<=', $endDate);
+            })
+            ->when($user->status_user !== 'admin', function ($query) use ($user) {
+                $query->whereHas('barang', function ($q) use ($user) {
+                    $q->where('status_barang', $user->status_user);
+                });
             });
-
-        $peminjaman = $query->get();
-
-        // Export jika ada request export
-        if ($request->has('export')) {
-            if ($request->export == 'excel') {
+    
+        // Mengecek jika ada permintaan untuk export
+        if ($exportType) {
+            $peminjaman = $query->get(); // Mengambil data yang sudah difilter
+    
+            if ($exportType == 'excel') {
                 return Excel::download(new PeminjamanExport($peminjaman), 'laporan-data-peminjaman.xlsx');
-            } elseif ($request->export == 'pdf') {
+            } elseif ($exportType == 'pdf') {
                 $pdf = Pdf::loadView('pdf.peminjaman', ['peminjaman' => $peminjaman]);
                 return $pdf->download('laporan-data-peminjaman.pdf');
             }
         }
-
-        // Jika tidak export, tampilkan view biasa
+    
+        // Jika tidak export, lakukan pagination seperti biasa
         $peminjaman = $query->paginate(10)->withQueryString();
-
+    
         return view('peminjaman.index', compact('peminjaman', 'keyword', 'startDate', 'endDate'));
     }
+    
+    
 
 
 
@@ -82,10 +93,13 @@ class PeminjamanController extends Controller
      */
     public function create()
     {
-        // Get all barang data
-        $barang = Barangs::all();
+        $user = Auth::user();
+        if ($user->status_user === 'admin') {
+            $barang = Barangs::all(); 
+        } else {
+            $barang = Barangs::where('status_barang', $user->status_user)->get();
+        }
 
-        // Return the view with barang data
         return view('peminjaman.create', compact('barang'));
     }
 
@@ -163,8 +177,15 @@ class PeminjamanController extends Controller
      */
     public function edit($id)
     {
-        $peminjaman = Peminjamans::findOrFail($id);
-        $barang = Barangs::all();
+        $user = Auth::user();
+        if ($user->status_user === 'admin') {
+            $peminjaman = Peminjamans::findOrFail($id);
+            $barang = Barangs::all(); 
+        } else {
+            $peminjaman = Peminjamans::findOrFail($id);
+            $barang = Barangs::where('status_barang', $user->status_user)->get();
+        }
+
         return view('peminjaman.edit', compact('peminjaman', 'barang'));
     }
 

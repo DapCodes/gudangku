@@ -31,7 +31,7 @@ class BarangMasukExport implements FromCollection, WithHeadings, WithStyles, Wit
                 'Nama Barang' => optional($item->barang)->nama,
                 'Merek' => optional($item->barang)->merek,
                 'Jumlah' => $item->jumlah,
-                'Tanggal Keluar' => $item->tanggal_keluar,
+                'Tanggal Keluar' => $item->tanggal_masuk,
                 'Keterangan' => $item->keterangan,
             ];
         });

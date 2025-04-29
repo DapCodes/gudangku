@@ -31,34 +31,54 @@ class BarangController extends Controller
      */
     public function index(Request $request)
     {
+        $user = Auth::user(); // Ambil user login
         $keyword = $request->input('search');
         $exportType = $request->input('export');
 
-        $barangQuery = Barangs::when($keyword, function ($query) use ($keyword) {
-            $query->where('nama', 'like', "%$keyword%")
-                ->orWhere('merek', 'like', "%$keyword%");
-        });
+        // Mulai query barang
+        $barangQuery = Barangs::query();
 
-        $barang = $barangQuery->get();
-
-        if ($exportType == 'excel') {
-            return \Maatwebsite\Excel\Facades\Excel::download(new BarangExport($barang), 'laporan-data-barang.xlsx');
+        // Filter berdasarkan status_user jika bukan admin
+        if ($user->status_user !== 'admin') {
+            $barangQuery->where('status_barang', $user->status_user);
         }
 
+        // Tambahkan filter pencarian jika ada keyword
+        if ($keyword) {
+            $barangQuery->where(function ($query) use ($keyword) {
+                $query->where('nama', 'like', "%$keyword%")
+                    ->orWhere('merek', 'like', "%$keyword%");
+            });
+        }
+
+        // Ambil data
+        $barang = $barangQuery->get();
+
+        // Export Excel
+        if ($exportType == 'excel') {
+            return Excel::download(new BarangExport($barang), 'laporan-data-barang.xlsx');
+        }
+
+        // Export PDF
         if ($exportType == 'pdf') {
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.barang', ['barang' => $barang]);
+            $pdf = Pdf::loadView('pdf.barang', ['barang' => $barang]);
             return $pdf->download('laporan-data-barang.pdf');
         }
 
+        // Tampilkan view
         return view('barang.index', compact('barang', 'keyword'));
     }
 
-    
-
-
     public function create()
     {
-        return view('barang.create');
+        $user = Auth::user();
+        if ($user->status_user === 'admin') {
+            $barang = Barangs::all(); 
+        } else {
+            $barang = Barangs::where('status_barang', $user->status_user)->get();
+        }
+
+        return view('barang.create', compact('barang'));
     }
 
     /**
@@ -131,7 +151,15 @@ class BarangController extends Controller
 
     public function edit($id)
     {
-        $barang = Barangs::findOrFail($id);
+        $user = Auth::user();
+        if ($user->status_user === 'admin') {
+            $barang = Barangs::findOrFail($id);
+        } else {
+            $barang = Barangs::where('status_barang', $user->status_user)
+                        ->where('id', $id)
+                        ->firstOrFail();
+        }
+
         return view('barang.edit', compact('barang'));
     }
 

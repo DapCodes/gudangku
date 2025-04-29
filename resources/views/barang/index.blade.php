@@ -7,30 +7,30 @@
         <div class="px-3 py-3 d-flex justify-content-between">
             <div>
                 <form action="{{ route('barang.index') }}" method="GET" class="d-flex justify-content-between gap-1">
-                <a href="{{ route('barang.create') }}">
-                    <button type="button" class="btn btn-primary">
-                        <i class="bx bx-folder-plus" style="position: relative; bottom: 2px;"></i>
-                        Tambah Data
+                    <a href="{{ route('barang.create') }}">
+                        <button type="button" class="btn btn-primary">
+                            <i class="bx bx-folder-plus" style="position: relative; bottom: 2px;"></i>
+                            Tambah Data
+                        </button>
+                    </a>
+
+                    <!-- Tombol untuk PDF -->
+                    <button type="submit" name="export" class="btn btn-danger" value="pdf">
+                        <i class="bx bxs-file-pdf" style="position: relative; bottom: 2px;"></i>
                     </button>
-                </a>
 
-                <!-- Tombol untuk PDF -->
-                <button type="submit" name="export" class="btn btn-danger" value="pdf">
-                    <i class="bx bxs-file-pdf" style="position: relative; bottom: 2px;"></i>
-                </button>
-
-                <!-- Tombol untuk Excel -->
-                <button type="submit" name="export" class="btn btn-success" value="excel">
-                    <i class="bx bx-spreadsheet" style="position: relative; bottom: 2px;"></i>
-                </button>
+                    <!-- Tombol untuk Excel -->
+                    <button type="submit" name="export" class="btn btn-success" value="excel">
+                        <i class="bx bx-spreadsheet" style="position: relative; bottom: 2px;"></i>
+                    </button>
 
             </div>
 
             <div class="d-flex align-items-center border-start ps-3 gap-1">
                 <i class="bx bx-search fs-4 lh-0 me-2"></i>
 
-                <input type="text" name="search" class="form-control border-0 shadow-none"
-                    placeholder="Cari..." aria-label="Cari..." value="{{ request('search') }}" />
+                <input type="text" name="search" class="form-control border-0 shadow-none" placeholder="Cari..."
+                    aria-label="Cari..." value="{{ request('search') }}" />
 
                 <button class="btn btn-primary" type="submit">Cari</button>
 
@@ -77,7 +77,7 @@
                             </td>
                             <td>{{ $barang->stok }}</td>
                             @if ($status == 'admin')
-                            <td>{{ $barang->status_barang }}</td>
+                                <td>{{ $barang->status_barang }}</td>
                             @endif
                             <td style="overflow: visible;">
                                 <div class="dropdown">

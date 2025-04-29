@@ -70,8 +70,9 @@
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Status Petugas</label>
                         <div class="col-sm-10">
                             <div class="input-group input-group-merge">
-                                <select name="status_user" id="status_user" class="form-control @error('status_user') is-invalid @enderror">
-                                    <option >Pilih Status Petugas</option>
+                                <select name="status_user" id="status_user"
+                                    class="form-control @error('status_user') is-invalid @enderror">
+                                    <option>Pilih Status Petugas</option>
                                     <option value="RPL">Petugas RPL</option>
                                     <option value="TBSM">Petugas TBSM</option>
                                     <option value="TKRO">Petugas TKRO</option>

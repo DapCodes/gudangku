@@ -10,7 +10,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Gudangku</title>
+    <title>Invas</title>
 
     <meta name="description" content="" />
 
@@ -104,7 +104,8 @@
                                                     @if (Auth::user()->is_admin == 1)
                                                         <small class="text-muted">Admin</small>
                                                     @else
-                                                        <small class="text-muted">Karyawan</small>
+                                                        <small class="text-muted">Petugas
+                                                            {{ Auth::user()->status_user }}</small>
                                                     @endif
                                                 </div>
                                             </div>
@@ -116,7 +117,7 @@
                                     <li>
                                         <a class="dropdown-item" href="{{ route('logout') }}"
                                             onclick="event.preventDefault();
-                            document.getElementById('logout-form').submit();">
+                                            document.getElementById('logout-form').submit();">
                                             <i class="bx bx-power-off me-2"></i>
                                             <span class="align-middle">Keluar</span>
                                             <form id="logout-form" action="{{ route('logout') }}" method="POST"
@@ -186,12 +187,16 @@
                 }
             });
         }
+    </script>
 
+    <script>
         function pilihBarang(id, nama, merek) {
-            document.getElementById('id_barang').value = id; // set id_barang hidden
-            document.getElementById('dropdownBarang').innerText = `${nama} - ${merek}`; // ganti teks tombol jadi nama barang
+            document.getElementById('id_barang').value = id;
+            document.getElementById('dropdownBarang').innerHTML =
+                `<i style="position: relative; right: 8px; bottom: 2px;" class="bx bx-box"></i> ${nama} - ${merek}`;
         }
     </script>
+
 
 
 </body>

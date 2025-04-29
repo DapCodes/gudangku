@@ -21,22 +21,26 @@
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Pilih Barang</label>
                         <div class="col-sm-10">
                             <div class="dropdown">
-                                <button style="text-align: left;" class="w-100 btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownBarang" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i style="position: relative; right: 8px; bottom: 2px;" class="bx bx-box"></i>
+                                <button style="text-align: left;" class="w-100 btn btn-outline-secondary dropdown-toggle"
+                                    type="button" id="dropdownBarang" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i style="position: relative; right: 8px; bottom: 2px;" class="bx bx-box"></i>
                                     Pilih Barang
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownBarang" style="width: 100%;">
                                     @foreach ($barang as $item)
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-start" href="#" onclick="pilihBarang('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->merek }}')">
-                                            <img src="{{ asset('image/barang/' . $item->foto) }}" alt="{{ $item->nama }}" width="50" height="50" class="me-3 rounded">
-                                            <div class="flex-grow-1">
-                                                <div><strong>{{ $item->nama }}</strong> - {{ $item->merek }}</div>
-                                                <small class="text-muted">Stok: {{ $item->stok }}</small>
-                                            </div>
-                                        </a>
-                                        <hr class="my-1">
-                                    </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-start" href="#"
+                                                onclick="pilihBarang('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->merek }}')">
+                                                <img src="{{ asset('image/barang/' . $item->foto) }}"
+                                                    alt="{{ $item->nama }}" width="50" height="50"
+                                                    class="me-3 rounded">
+                                                <div class="flex-grow-1">
+                                                    <div><strong>{{ $item->nama }}</strong> - {{ $item->merek }}</div>
+                                                    <small class="text-muted">Stok: {{ $item->stok }}</small>
+                                                </div>
+                                            </a>
+                                            <hr class="my-1">
+                                        </li>
                                     @endforeach
                                 </ul>
                                 @error('id_barang')

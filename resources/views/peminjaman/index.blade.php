@@ -69,13 +69,14 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->kode_barang }}</td>
-                            <td>{{ $item->barang->nama . " - " . $item->barang->merek }}</td>
+                            <td>{{ $item->barang->nama . ' - ' . $item->barang->merek }}</td>
                             <td>{{ $item->barang->kode_barang }}</td>
                             <td>{{ $item->jumlah }}</td>
                             <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->translatedFormat('l, d F Y') }}</td>
                             <td>{{ \Carbon\Carbon::parse($item->tanggal_kembali)->translatedFormat('l, d F Y') }}</td>
                             <td>{{ $item->nama_peminjam }}</td>
-                            <td class="{{ $item->status == 'Sedang Dipinjam' ? 'text-danger' : ($item->status == 'Sudah Dikembalikan' ? 'text-success' : '') }}">
+                            <td
+                                class="{{ $item->status == 'Sedang Dipinjam' ? 'text-danger' : ($item->status == 'Sudah Dikembalikan' ? 'text-success' : '') }}">
                                 {{ $item->status }}
                             </td>
                             <td style="overflow: visible;">
@@ -90,7 +91,7 @@
                                             <i class="bx bx-show-alt me-1"></i> Detail
                                         </a>
 
-                                       <!-- Tombol Edit -->
+                                        <!-- Tombol Edit -->
                                         <a class="dropdown-item" href="{{ route('peminjaman.edit', $item->id) }}">
                                             <i class="bx bx-edit-alt me-1"></i> Edit
                                         </a>

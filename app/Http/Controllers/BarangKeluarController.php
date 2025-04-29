@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 use App\Models\BarangKeluars;
 use App\Models\Barangs;
@@ -20,16 +22,18 @@ class BarangKeluarController extends Controller
 
     public function index(Request $request)
     {
+        $user = Auth::user();
+        
         $keyword = $request->input('search');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $exportType = $request->input('export');
-    
-        $barangKeluar = BarangKeluars::with('barang')
+
+        $query = BarangKeluars::with('barang')
             ->when($keyword, function ($query) use ($keyword) {
                 $query->whereHas('barang', function ($q) use ($keyword) {
                     $q->where('nama', 'like', "%$keyword%")
-                      ->orWhere('merek', 'like', "%$keyword%");
+                    ->orWhere('merek', 'like', "%$keyword%");
                 });
             })
             ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
@@ -41,20 +45,31 @@ class BarangKeluarController extends Controller
             ->when(!$startDate && $endDate, function ($query) use ($endDate) {
                 $query->whereDate('tanggal_keluar', '<=', $endDate);
             })
-            ->get();
-            
-    
+            ->when($user->status_user !== 'admin', function ($query) use ($user) {
+                $query->whereHas('barang', function ($q) use ($user) {
+                    $q->where('status_barang', $user->status_user);
+                });
+            });
+
+        $barangKeluar = $query->get();
+
+        // Export jika ada request
         if ($exportType == 'excel') {
-            return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\BarangKeluarExport($barangKeluar), 'laporan-data-barangkeluar.xlsx');
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\BarangKeluarExport($barangKeluar),
+                'laporan-data-barangkeluar.xlsx'
+            );
         }
-    
+
         if ($exportType == 'pdf') {
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.barangKeluar', ['barangKeluar' => $barangKeluar]);
             return $pdf->download('laporan-data-barangkeluar.pdf');
         }
-    
+
         return view('barangkeluar.index', compact('barangKeluar', 'keyword', 'startDate', 'endDate'));
     }
+
+
     
 
     /**
@@ -64,10 +79,13 @@ class BarangKeluarController extends Controller
      */
     public function create()
     {
-        //Ambil data dari model Barangs
-        $barang = Barangs::all();
+        $user = Auth::user();
+        if ($user->status_user === 'admin') {
+            $barang = Barangs::all(); 
+        } else {
+            $barang = Barangs::where('status_barang', $user->status_user)->get();
+        }
 
-        //Tampilkan data ke view barang_keluar.create
         return view('barangkeluar.create', compact('barang'));
     }
 
@@ -147,10 +165,16 @@ class BarangKeluarController extends Controller
      */
     public function edit($id)
     {
-        $barangKeluar = BarangKeluars::findOrFail($id);
-        $barang = Barangs::all();
+        $user = Auth::user();
+        if ($user->status_user === 'admin') {
+            $barangKeluar = BarangKeluars::findOrFail($id);
+            $barang = Barangs::all();
+        } else {
+            $barangKeluar = BarangKeluars::findOrFail($id);
+            $barang = Barangs::where('status_barang', $user->status_user)->get();
+        }
 
-        return view('barangkeluar.edit', compact('barangKeluar', 'barang'));
+        return view('barangkeluar.edit', compact('barang', 'barangKeluar'));
     }
 
     /**
@@ -181,31 +205,36 @@ class BarangKeluarController extends Controller
         ]);
 
         $barangKeluar = BarangKeluars::findOrFail($id);
+        $barangLama = Barangs::findOrFail($barangKeluar->id_barang); // Barang lama (sebelum diedit)
 
-        $barangKeluar->jumlah = $request->jumlah;
-        $barangKeluar->tanggal_keluar = $request->tanggal_keluar;
-        $barangKeluar->keterangan = $request->keterangan;
-        $barangKeluar->id_barang = $request->id_barang;
-
-        // Ambil stok lama dan update stok di barang lama
-        $barangLama = Barangs::findOrFail($barangKeluar->id_barang);
+        // Kembalikan stok barang lama
         $barangLama->stok += $barangKeluar->jumlah;
         $barangLama->save();
 
-        // Update stok barang
-        $barang = Barangs::findOrFail($request->id_barang);
-        if ($barang->stok < $request->jumlah) {
-            Alert::error('Gagal!', 'Stok tidak mencukupi');
+        // Ambil barang baru (yang dipilih pada form)
+        $barangBaru = Barangs::findOrFail($request->id_barang);
+
+        // Cek stok cukup atau tidak
+        if ($barangBaru->stok < $request->jumlah) {
+            Alert::error('Gagal!', 'Stok barang tidak mencukupi untuk dikeluarkan.');
             return redirect()->back();
         }
 
-        $barang->stok -= $request->jumlah;
-        $barang->save();
+        // Kurangi stok barang baru
+        $barangBaru->stok -= $request->jumlah;
+        $barangBaru->save();
 
+        // Update data barang keluar
+        $barangKeluar->id_barang = $request->id_barang;
+        $barangKeluar->jumlah = $request->jumlah;
+        $barangKeluar->tanggal_keluar = $request->tanggal_keluar;
+        $barangKeluar->keterangan = $request->keterangan;
         $barangKeluar->save();
-        Alert::success('Berhasil!', 'Data Berhasil Diperbarui');
+
+        Alert::success('Berhasil!', 'Data berhasil diperbarui.');
         return redirect()->route('brg-keluar.index');
     }
+
 
     /**
      * Remove the specified resource from storage.

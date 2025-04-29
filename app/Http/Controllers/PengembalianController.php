@@ -7,7 +7,9 @@ use App\Models\Pengembalians;
 use App\Models\Barangs;
 use App\Models\Peminjamans;
 
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+
 use App\Exports\PengembalianExport;
 use RealRashid\SweetAlert\Facades\Alert;
 use Maatwebsite\Excel\Facades\Excel;
@@ -27,16 +29,19 @@ class PengembalianController extends Controller
      */
     public function index(Request $request)
     {
+        $user = Auth::user();
+
         $keyword = $request->input('search');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
+        // Query data sesuai filter dan status_user
         $query = Pengembalians::with('barang')
             ->where('status', 'Sudah Dikembalikan')
             ->when($keyword, function ($query) use ($keyword) {
                 $query->whereHas('barang', function ($q) use ($keyword) {
                     $q->where('nama', 'like', "%$keyword%")
-                        ->orWhere('merek', 'like', "%$keyword%");
+                      ->orWhere('merek', 'like', "%$keyword%");
                 });
             })
             ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
@@ -47,26 +52,33 @@ class PengembalianController extends Controller
             })
             ->when(!$startDate && $endDate, function ($query) use ($endDate) {
                 $query->whereDate('tanggal_kembali', '<=', $endDate);
+            })
+            ->when($user->status_user !== 'admin', function ($query) use ($user) {
+                $query->whereHas('barang', function ($q) use ($user) {
+                    $q->where('status_barang', $user->status_user);
+                });
             });
 
-        // Export jika ada request export
+        // Export
         if ($request->has('export')) {
-            if ($request->export == 'excel') {
-                return Excel::download(new PengembalianExport($query->get()), 'laporan-data-pengembalian.xlsx');
-            } elseif ($request->export == 'pdf') {
-                $pdf = Pdf::loadView('pdf.pengembalian', ['pengembalian' => $query->get()]);
+            $dataExport = $query->get();
+
+            if ($request->export === 'excel') {
+                return Excel::download(new PengembalianExport($dataExport), 'laporan-data-pengembalian.xlsx');
+            } elseif ($request->export === 'pdf') {
+                $pdf = Pdf::loadView('pdf.pengembalian', ['pengembalian' => $dataExport]);
                 return $pdf->download('laporan-data-pengembalian.pdf');
             }
         }
 
-        // Jika tidak export, tampilkan view biasa dengan paginasi
+        // Pagination untuk tampilan
         $pengembalian = $query->paginate(10)->withQueryString();
 
         return view('pengembalian.index', compact('pengembalian', 'keyword', 'startDate', 'endDate'));
     }
 
     /**
-     * Show the specified resource.
+     * Detail pengembalian
      */
     public function show($id)
     {

@@ -8,8 +8,7 @@
         <!-- Gambar dan info singkat produk -->
         <div class="col-md-6 col-lg-4">
             <div class="card">
-                <img class="card-img-top mt-5" src="{{ asset('/image/barang/' . $barang->foto) }}"
-                    alt="Card image cap" />
+                <img class="card-img-top mt-5" src="{{ asset('/image/barang/' . $barang->foto) }}" alt="Card image cap" />
                 <div class="card-body">
 
                 </div>
@@ -23,7 +22,7 @@
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <div>
                         <h5 class="card-title">{{ $barang->nama . ' - ' . $barang->merek }}</h5>
-                        <p>{{ "Status: " . $peminjaman->status }}</p>
+                        <p>{{ 'Status: ' . $peminjaman->status }}</p>
                         <div class="card-subtitle text-muted">
                             {{ $barang->kode_barang }} <br>
                             {{ $peminjaman->kode_barang }}
@@ -55,7 +54,7 @@
                         <div class="card-body">
                             <span class="fw-semibold d-block mb-1">
                                 <i class="bx bx-user" style="position: relative; bottom: 2px;"></i>
-                                Nama Peminjam   
+                                Nama Peminjam
                             </span>
                             <h3 class="mt-2 mb-3">{{ $peminjaman->nama_peminjam }}</h2>
                         </div>
@@ -64,14 +63,15 @@
             </div>
 
             <div class="row g-3 mb-3">
-            <div class="col-md-6 col-lg-6">
+                <div class="col-md-6 col-lg-6">
                     <div class="card">
                         <div class="card-body">
                             <span class="fw-semibold d-block mb-1">
                                 <i class="bx bx-calendar" style="position: relative; bottom: 2px;"></i>
                                 Tanggal Barang Dipinjam
                             </span>
-                            <h3 class="card-title mb-0 text-primary">{{ \Carbon\Carbon::parse($peminjaman->tanggal_pinjam)->translatedFormat('l, d F Y') }}</h3>
+                            <h3 class="card-title mb-0 text-primary">
+                                {{ \Carbon\Carbon::parse($peminjaman->tanggal_pinjam)->translatedFormat('l, d F Y') }}</h3>
                         </div>
                     </div>
                 </div>
@@ -82,7 +82,8 @@
                                 <i class="bx bx-calendar" style="position: relative; bottom: 2px;"></i>
                                 Tanggal Barang Dikembalikan
                             </span>
-                            <h3 class="card-title mb-0 text-primary">{{ \Carbon\Carbon::parse($peminjaman->tanggal_kembali)->translatedFormat('l, d F Y') }}</h3>
+                            <h3 class="card-title mb-0 text-primary">
+                                {{ \Carbon\Carbon::parse($peminjaman->tanggal_kembali)->translatedFormat('l, d F Y') }}</h3>
                         </div>
                     </div>
                 </div>

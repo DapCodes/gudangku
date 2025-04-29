@@ -1,9 +1,8 @@
         <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
             <div class="app-brand demo" style="position: relative; right: 10px;">
                 <a href="index.html" class="app-brand-link">
-                    <img style="width: 45px" src="{{ asset('admin/assets/img/icons/brands/gudangku-icon.png') }}"
+                    <img style="width: 200px" src="{{ asset('admin/assets/img/icons/brands/gudangku-icon.png') }}"
                         alt="">
-                    <h2 class="menu-text fw-bolder mt-3">Gudangku</h2>
                 </a>
 
                 <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -73,10 +72,4 @@
                     </a>
                 </li>
             </ul>
-            <img style="opacity: 0.09;
-                      position: absolute;
-                      left: 30px;
-                      top: 450px;
-                      width: 200px;"
-                src="{{ asset('admin/assets/img/icons/brands/gudangku-icon.png') }}" alt="">
         </aside>
