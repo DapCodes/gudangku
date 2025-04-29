@@ -20,13 +20,14 @@ return new class extends Migration
             $table->date('tanggal_kembali');
             $table->string('nama_peminjam');
             $table->string('status');
-            $table->unsignedBigInteger('id_peminjam');
+            $table->unsignedBigInteger('id_peminjam')->nullable();
             $table->unsignedBigInteger('id_barang');
             $table->timestamps();
+        
             $table->foreign('id_barang')->references('id')->on('barangs')->onDelete('cascade');
-            $table->foreign('id_peminjam')->references('id')->on('peminjamans')->onDelete('cascade');
-
+            $table->foreign('id_peminjam')->references('id')->on('peminjamans')->onDelete('set null');
         });
+        
     }
 
     /**

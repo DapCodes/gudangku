@@ -11,6 +11,7 @@ class Pengembalians extends Model
 
     protected $fillable = [
        'id',
+       'kode_barang',
        'jumlah',
        'tanggal_kembali',
        'nama_peminjam',
@@ -27,6 +28,6 @@ class Pengembalians extends Model
     }
 
     public function peminjamans() {
-        return $this->belongsTo(Peminjams::class,'id_peminjam');
+        return $this->belongsTo(Peminjamans::class,'id_peminjam');
     }
 }
