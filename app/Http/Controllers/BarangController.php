@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Http\Request;
 use App\Models\Barangs;
@@ -98,6 +99,8 @@ class BarangController extends Controller
             $img->move('image/barang', $name);
             $barang->foto = $name;
         }
+
+        $barang->status_barang = $request->status_barang;
 
         $barang->save(); 
 

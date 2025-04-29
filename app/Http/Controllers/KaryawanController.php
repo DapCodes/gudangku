@@ -76,19 +76,22 @@ class KaryawanController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:6',
+            'status_user' => 'required|string|max:255',
         ],
         [
             'name.required' => 'Nama tidak boleh kosong',
             'email.required' => 'Email tidak boleh kosong',
             'password.required' => 'Password tidak boleh kosong',
             'password.min' => 'Password minimal 8 karakter',
+            'status_user.required' => 'Status Petugas tidak boleh kosong'
         ]);
 
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
+        $user->status_user = $request->status_user;
         $user->is_admin = 0; // Set is_admin to 0 for regular users
         $user->save();
 

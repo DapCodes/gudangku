@@ -3,151 +3,277 @@
 
 @section('content')
 
-<div class="row">
-                <!-- Total Revenue -->
-                <div class="col-12 col-lg-8 order-2 order-md-3 order-lg-2 mb-4">
-                  <div class="card">
-                    <div class="row row-bordered g-0">
-                      <div class="col-md-8">
-                        <h5 class="card-header m-0 me-2 pb-3">Total Revenue</h5>
-                        <div id="totalRevenueChart" class="px-2"></div>
-                      </div>
-                      <div class="col-md-4">
-                        <div class="card-body">
-                          <div class="text-center">
-                            <div class="dropdown">
-                              <button
-                                class="btn btn-sm btn-outline-primary dropdown-toggle"
-                                type="button"
-                                id="growthReportId"
-                                data-bs-toggle="dropdown"
-                                aria-haspopup="true"
-                                aria-expanded="false"
-                              >
-                                2022
-                              </button>
-                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="growthReportId">
-                                <a class="dropdown-item" href="javascript:void(0);">2021</a>
-                                <a class="dropdown-item" href="javascript:void(0);">2020</a>
-                                <a class="dropdown-item" href="javascript:void(0);">2019</a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div id="growthChart"></div>
-                        <div class="text-center fw-semibold pt-3 mb-2">62% Company Growth</div>
-
-                        <div class="d-flex px-xxl-4 px-lg-2 p-4 gap-xxl-3 gap-lg-1 gap-3 justify-content-between">
-                          <div class="d-flex">
-                            <div class="me-2">
-                              <span class="badge bg-label-primary p-2"><i class="bx bx-dollar text-primary"></i></span>
-                            </div>
-                            <div class="d-flex flex-column">
-                              <small>2022</small>
-                              <h6 class="mb-0">$32.5k</h6>
-                            </div>
-                          </div>
-                          <div class="d-flex">
-                            <div class="me-2">
-                              <span class="badge bg-label-info p-2"><i class="bx bx-wallet text-info"></i></span>
-                            </div>
-                            <div class="d-flex flex-column">
-                              <small>2021</small>
-                              <h6 class="mb-0">$41.2k</h6>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!--/ Total Revenue -->
-                <div class="col-12 col-md-8 col-lg-4 order-3 order-md-2">
+    <div class="row mb-4">
+      <div class="col-lg-8">
+        <div class="card p-4">
+          <div class="card-body">
+            <h3 class="card-title text-center mb-4">Statistik Data</h3>
+            <div id="chart" style="height: 390.9px;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-4 order-1">
                   <div class="row">
-                    <div class="col-6 mb-4">
+                    <div class="col-lg-6 col-md-12 col-6 mb-4">
                       <div class="card">
                         <div class="card-body">
                           <div class="card-title d-flex align-items-start justify-content-between">
                             <div class="avatar flex-shrink-0">
-                              <img src="../assets/img/icons/unicons/paypal.png" alt="Credit Card" class="rounded" />
+                              <img
+                                src="../admin/assets/img/gif-icons/barang.png"
+                                alt="chart success"
+                                class="rounded"
+                              />
                             </div>
                             <div class="dropdown">
                               <button
                                 class="btn p-0"
                                 type="button"
-                                id="cardOpt4"
+                                id="cardOpt3"
                                 data-bs-toggle="dropdown"
                                 aria-haspopup="true"
                                 aria-expanded="false"
                               >
                                 <i class="bx bx-dots-vertical-rounded"></i>
                               </button>
-                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt4">
-                                <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                <a class="dropdown-item" href="javascript:void(0);">Delete</a>
+                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
+                                <a class="dropdown-item" href="{{ route('barang.index') }}">View More</a>
                               </div>
                             </div>
                           </div>
-                          <span class="d-block mb-1">Payments</span>
-                          <h3 class="card-title text-nowrap mb-2">$2,456</h3>
-                          <small class="text-danger fw-semibold"><i class="bx bx-down-arrow-alt"></i> -14.82%</small>
+                          <span class="fw-semibold d-block mb-1">Barang</span>
+                          <h3 class="card-title mb-2">{{ $barang }}</h3>
                         </div>
                       </div>
                     </div>
-                    <div class="col-6 mb-4">
+                    <div class="col-lg-6 col-md-12 col-6 mb-4">
                       <div class="card">
                         <div class="card-body">
                           <div class="card-title d-flex align-items-start justify-content-between">
                             <div class="avatar flex-shrink-0">
-                              <img src="../assets/img/icons/unicons/cc-primary.png" alt="Credit Card" class="rounded" />
+                              <img
+                                src="../admin/assets/img/illustrations/man-with-laptop-light.png"
+                                alt="chart success"
+                                class="rounded"
+                              />
                             </div>
                             <div class="dropdown">
                               <button
                                 class="btn p-0"
                                 type="button"
-                                id="cardOpt1"
+                                id="cardOpt3"
                                 data-bs-toggle="dropdown"
                                 aria-haspopup="true"
                                 aria-expanded="false"
                               >
                                 <i class="bx bx-dots-vertical-rounded"></i>
                               </button>
-                              <div class="dropdown-menu" aria-labelledby="cardOpt1">
-                                <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                <a class="dropdown-item" href="javascript:void(0);">Delete</a>
+                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
+                                <a class="dropdown-item" href="{{ route('karyawan.index') }}">View More</a>
                               </div>
                             </div>
                           </div>
-                          <span class="fw-semibold d-block mb-1">Transactions</span>
-                          <h3 class="card-title mb-2">$14,857</h3>
-                          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +28.14%</small>
+                          <span class="fw-semibold d-block mb-1">Petugas</span>
+                          <h3 class="card-title mb-2">{{ $karyawan }}</h3>
+             
                         </div>
                       </div>
                     </div>
-                    
-                    <div class="col-12 mb-4">
+                    <div class="col-lg-6 col-md-12 col-6 mb-4">
                       <div class="card">
                         <div class="card-body">
-                          <div class="d-flex justify-content-between flex-sm-row flex-column gap-3">
-                            <div class="d-flex flex-sm-column flex-row align-items-start justify-content-between">
-                              <div class="card-title">
-                                <h5 class="text-nowrap mb-2">Profile Report</h5>
-                                <span class="badge bg-label-warning rounded-pill">Year 2021</span>
-                              </div>
-                              <div class="mt-sm-auto">
-                                <small class="text-success text-nowrap fw-semibold"
-                                  ><i class="bx bx-chevron-up"></i> 68.2%</small
-                                >
-                                <h3 class="mb-0">$84,686k</h3>
+                          <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                              <img
+                                src="../admin/assets/img/gif-icons/masuk.png"
+                                alt="chart success"
+                                class="rounded"
+                              />
+                            </div>
+                            <div class="dropdown">
+                              <button
+                                class="btn p-0"
+                                type="button"
+                                id="cardOpt3"
+                                data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                              >
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
+                                <a class="dropdown-item" href="{{ route('brg-masuk.index') }}">View More</a>
                               </div>
                             </div>
-                            <div id="profileReportChart"></div>
                           </div>
+                          <span class="fw-semibold d-block mb-1">Barang Masuk</span>
+                          <h3 class="card-title mb-2">{{ $barangMasuk }}</h3>
+             
                         </div>
                       </div>
                     </div>
+                    <div class="col-lg-6 col-md-12 col-6 mb-4">
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                              <img
+                                src="../admin/assets/img/gif-icons/keluar.png"
+                                alt="chart success"
+                                class="rounded"
+                              />
+                            </div>
+                            <div class="dropdown">
+                              <button
+                                class="btn p-0"
+                                type="button"
+                                id="cardOpt3"
+                                data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                              >
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
+                                <a class="dropdown-item" href="{{ route('brg-keluar.index') }}">View More</a>
+                              </div>
+                            </div>
+                          </div>
+                          <span class="fw-semibold d-block mb-1">Barang Keluar</span>
+                          <h3 class="card-title mb-2">{{ $barangKeluar }}</h3>
+             
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-lg-6 col-md-12 col-6 mb-4">
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                              <img
+                                src="../admin/assets/img/gif-icons/pinjam.png"
+                                alt="chart success"
+                                class="rounded"
+                              />
+                            </div>
+                            <div class="dropdown">
+                              <button
+                                class="btn p-0"
+                                type="button"
+                                id="cardOpt3"
+                                data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                              >
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
+                                <a class="dropdown-item" href="{{ route('peminjaman.index') }}">View More</a>
+                              </div>
+                            </div>
+                          </div>
+                          <span class="fw-semibold d-block mb-1">Peminjaman</span>
+                          <h3 class="card-title mb-2">{{ $peminjaman }}</h3>
+             
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-lg-6 col-md-12 col-6 mb-4">
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                              <img
+                                src="../admin/assets/img/gif-icons/kembali.png"
+                                alt="chart success"
+                                class="rounded"
+                              />
+                            </div>
+                            <div class="dropdown">
+                              <button
+                                class="btn p-0"
+                                type="button"
+                                id="cardOpt3"
+                                data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                              >
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
+                                <a class="dropdown-item" href="{{ route('pengembalian.index') }}">View More</a>
+                              </div>
+                            </div>
+                          </div>
+                          <span class="fw-semibold d-block mb-1">Pengembalian</span>
+                          <h3 class="card-title mb-2">{{ $pengembalian }}</h3>
+             
+                        </div>
+                      </div>
+                    </div>
+                   
                   </div>
                 </div>
-              </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var options = {
+            chart: {
+                type: 'bar',
+                height: 350,
+                toolbar: {
+                    show: false
+                }
+            },
+            series: [{
+                name: 'Jumlah',
+                data: {!! json_encode($chartData['series']) !!}
+            }],
+            xaxis: {
+                categories: {!! json_encode($chartData['labels']) !!},
+                labels: {
+                    style: {
+                        fontSize: '10px',
+                        colors: '#6B7280'
+                    }
+                }
+            },
+            colors: ['#3B82F6'],
+            plotOptions: {
+                bar: {
+                    borderRadius: 20,
+                    borderRadiusApplication: 'end',
+                    borderRadiusWhenStacked: 'last',
+                    columnWidth: '50%',
+                    distributed: false
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                style: {
+                    fontSize: '13px',
+                    colors: ['#ffffff']
+                }
+            },
+            tooltip: {
+                theme: 'light',
+                y: {
+                    formatter: function (val) {
+                        return val + ' data';
+                    }
+                }
+            },
+            grid: {
+                borderColor: '#E5E7EB',
+                strokeDashArray: 4
+            }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+    });
+</script>
+
 
 @endsection

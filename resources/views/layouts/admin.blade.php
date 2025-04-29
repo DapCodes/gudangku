@@ -157,6 +157,7 @@
 
     <!-- Vendors JS -->
     <script src="{{ asset('admin/assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Main JS -->
     <script src="{{ asset('admin/assets/js/main.js') }}"></script>
@@ -167,6 +168,7 @@
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         function confirmDelete(id) {
             Swal.fire({
@@ -190,6 +192,7 @@
             document.getElementById('dropdownBarang').innerText = `${nama} - ${merek}`; // ganti teks tombol jadi nama barang
         }
     </script>
+
 
 </body>
 

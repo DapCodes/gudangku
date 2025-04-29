@@ -52,6 +52,12 @@
                         <th>Merk</th>
                         <th>Foto</th>
                         <th>Stok</th>
+                        @php
+                            $status = Auth::user()->status_user;
+                        @endphp
+                        @if ($status == 'admin')
+                            <th>Status</th>
+                        @endif
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -70,6 +76,9 @@
                                 </a>
                             </td>
                             <td>{{ $barang->stok }}</td>
+                            @if ($status == 'admin')
+                            <td>{{ $barang->status_barang }}</td>
+                            @endif
                             <td style="overflow: visible;">
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow"

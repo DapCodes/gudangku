@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('merek');
             $table->string('foto');
             $table->unsignedBigInteger('stok')->default(0);
+            $table->string('status_barang');
             $table->timestamps();
         });
     }

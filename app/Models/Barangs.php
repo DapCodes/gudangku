@@ -15,6 +15,7 @@ class Barangs extends Model
         'merek',
         'foto',
         'stok',
+        'status_barang',
     ];
 
     public $timestamps = true;

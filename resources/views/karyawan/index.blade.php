@@ -49,6 +49,7 @@
                         <th>#</th>
                         <th>Nama</th>
                         <th>Email</th>
+                        <th>Status User</th>
                         <th>Tanggal Daftar</th>
                         <th>Aksi</th>
                     </tr>
@@ -59,6 +60,7 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->name }}</td>
                             <td>{{ $item->email }}</td>
+                            <td>{{ "Petugas " . $item->status_user }}</td>
                             <td>{{ \Carbon\Carbon::parse($item->created_at)->translatedFormat('l, d F Y') }}</td>
                             <td style="overflow: visible;">
                                 <div class="dropdown">
@@ -69,7 +71,7 @@
                                     <div class="dropdown-menu">
                                         <!-- Tombol Edit -->
                                         <a class="dropdown-item" href="{{ route('karyawan.edit', $item->id) }}">
-                                            <i class="bx bx-edit-alt me-1"></i> Edit
+                                            <i class="bx bx-edit-alt me-1"></i> Ubah
                                         </a>
 
                                         <!-- Form Delete (Disembunyikan) -->
