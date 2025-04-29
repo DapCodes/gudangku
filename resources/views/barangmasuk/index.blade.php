@@ -7,42 +7,49 @@
     <div class="card">
         <div class="px-3 py-3 d-flex justify-content-between">
             <div>
-                <a href="{{ route('brg-masuk.create') }}">
-                    <button type="button" class="btn btn-primary">
-                        <i class="bx bx-folder-plus" style="position: relative; bottom: 2px;"></i>
-                        Tambah Data
+                <form action="{{ route('brg-masuk.index') }}" method="GET" class="d-flex justify-content-between gap-1">
+                    <a href="{{ route('brg-masuk.create') }}">
+                        <button type="button" class="btn btn-primary">
+                            <i class="bx bx-folder-plus" style="position: relative; bottom: 2px;"></i>
+                            Tambah
+                        </button>
+                    </a>
+
+                    <button type="submit" name="export" class="btn btn-danger" value="pdf">
+                        <i class="bx bxs-file-pdf" style="position: relative; bottom: 2px;"></i>
                     </button>
-                </a>
-                <a href="{{ route('brg-masuk.export') }}">
-                    <button type="button" class="btn btn-danger">
-                        <i class="bx bx-file" style="position: relative; bottom: 2px;"></i>
-                        Buat PDF
+
+
+                    <button type="submit" name="export" class="btn btn-success" value="excel">
+                        <i class="bx bx-spreadsheet" style="position: relative; bottom: 2px;"></i>
                     </button>
-                </a>
-                <a href="{{ route('brg-masuk.export.excel') }}">
-                    <button type="button" class="btn btn-success">
-                        <i class="bx bx-file" style="position: relative; bottom: 2px;"></i>
-                        Buat Excel
-                    </button>
-                </a>
+
             </div>
-            <div class="d-flex align-items-center border-start ps-3">
+
+            <div class="d-flex align-items-center border-start ps-3 gap-1">
                 <i class="bx bx-search fs-4 lh-0 me-2"></i>
 
-                <form action="{{ route('brg-masuk.index') }}" method="GET" class="d-flex align-items-center gap-2">
-                    <input type="text" name="search" class="form-control border-0 shadow-none" placeholder="Cari..."
-                        aria-label="Cari..." value="{{ request('search') }}" />
+                <input type="text" name="search" class="form-control border-0 border-bottom shadow-none"
+                    placeholder="Cari..." aria-label="Cari..." value="{{ request('search') }}" />
 
-                    <button class="btn btn-primary" type="submit">Cari</button>
+                <!-- Tambahkan filter tanggal -->
+                <input type="date" name="start_date" class="form-control border-0 shadow-none"
+                    value="{{ request('start_date') }}" />
+                <span class="mx-1"> - </span>
+                <input type="date" name="end_date" class="form-control border-0 shadow-none"
+                    value="{{ request('end_date') }}" />
 
-                    @if (request()->has('search') && request()->search != '')
-                        <a href="{{ route('brg-masuk.index') }}" class="btn btn-secondary">
-                            <i class="bx bx-refresh"></i>
-                        </a>
-                    @endif
+                <button class="btn btn-primary" type="submit">Cari</button>
+
+                @if ((request()->has('search') && request()->search != '') || request()->has('start_date') || request()->has('end_date'))
+                    <a href="{{ route('brg-masuk.index') }}" class="btn btn-secondary">
+                        <i class="bx bx-refresh"></i>
+                    </a>
+                @endif
                 </form>
             </div>
         </div>
+
         <div class="table-responsive text-nowrap">
             <table class="table table-striped">
                 <thead>

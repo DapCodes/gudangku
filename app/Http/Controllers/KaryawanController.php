@@ -15,26 +15,7 @@ Carbon::setLocale('id');
 
 class KaryawanController extends Controller
 {
-     // cek auth
-     public function __construct()
-     {
-         $this->middleware('auth');
-     }
-
-    public function export()
-    {
-        $karyawan = User::where('is_admin', 0)->get();
-
-        $pdf = Pdf::loadView('pdf.karyawan', ['karyawan' => $karyawan]);
-
-        return $pdf->download('laporan-data-karyawan.pdf');
-    }
-
-    public function exportExcel()
-    {
-        return Excel::download(new KaryawanExport, 'laporan-data-karyawan.xlsx');
-    }
-
+     
     /**
      * Display a listing of the resource.
      *
@@ -42,19 +23,35 @@ class KaryawanController extends Controller
      */
     public function index(Request $request)
     {
-        $keyword = $request->input('search');
-    
-        $users = User::where('is_admin', 0)
-                    ->when($keyword, function ($query) use ($keyword) {
-                        $query->where(function ($q) use ($keyword) {
-                            $q->where('name', 'like', "%$keyword%")
-                              ->orWhere('email', 'like', "%$keyword%");
-                        });
-                    })
-                    ->get();
-    
+        $keyword = $request->input('search'); // Menerima input pencarian
+        $exportType = $request->input('export'); // Menerima jenis ekspor (excel atau pdf)
+
+        // Query untuk mendapatkan data karyawan berdasarkan filter keyword
+        $karyawanQuery = User::where('is_admin', 0) // Mengambil data user yang bukan admin
+            ->when($keyword, function ($query) use ($keyword) {
+                // Menambahkan filter pencarian berdasarkan nama atau email
+                $query->where('name', 'like', "%$keyword%")
+                    ->orWhere('email', 'like', "%$keyword%");
+            });
+
+        // Ambil hasil query sesuai filter
+        $users = $karyawanQuery->get();
+
+        // Jika pengguna memilih untuk mengekspor ke Excel
+        if ($exportType == 'excel') {
+            return \Maatwebsite\Excel\Facades\Excel::download(new KaryawanExport($users), 'laporan-data-karyawan.xlsx');
+        }
+
+        // Jika pengguna memilih untuk mengekspor ke PDF
+        if ($exportType == 'pdf') {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.karyawan', ['users' => $users]);
+            return $pdf->download('laporan-data-karyawan.pdf');
+        }
+
+        // Menampilkan halaman daftar karyawan dengan data yang sudah difilter
         return view('karyawan.index', compact('users', 'keyword'));
     }
+
     
 
 
@@ -78,8 +75,14 @@ class KaryawanController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'email' => 'required|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
+        ],
+        [
+            'name.required' => 'Nama tidak boleh kosong',
+            'email.required' => 'Email tidak boleh kosong',
+            'password.required' => 'Password tidak boleh kosong',
+            'password.min' => 'Password minimal 8 karakter',
         ]);
 
         $user = new User();
@@ -126,6 +129,8 @@ class KaryawanController extends Controller
 
      public function update(Request $request, $id)
      {
+
+
          $user = User::findOrFail($id);
      
          // Validasi input (password tidak wajib diisi)
@@ -134,6 +139,13 @@ class KaryawanController extends Controller
              'email' => 'required|email|max:255|unique:users,email,' . $user->id,
              'current_password' => 'required',
              'password' => 'nullable|string|min:6|confirmed',
+         ],[
+            'name.required' => 'Nama tidak boleh kosong',
+            'email.required' => 'Email tidak boleh kosong',
+            'password.required' => 'Password tidak boleh kosong',
+            'current_password.required' => 'Password lama tidak boleh kosong',
+            'password.min' => 'Password minimal 6 karakter',
+            'password.confirmed' => 'Konfirmasi password tidak sesuai',
          ]);
      
          // Cek apakah password lama benar

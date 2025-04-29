@@ -28,6 +28,12 @@
                                     id="basic-icon-default-fullname" placeholder="Handphone" aria-label="Handphone"
                                     aria-describedby="basic-icon-default-fullname2" />
                             </div>
+                            @error('nama')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -40,6 +46,12 @@
                                     id="basic-icon-default-company" class="form-control" placeholder="Samsung"
                                     aria-label="Samsung" aria-describedby="basic-icon-default-company2" />
                             </div>
+                            @error('merek')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -51,6 +63,12 @@
                                     id="basic-icon-default-phone" class="form-control phone-mask" placeholder="658 799 8941"
                                     aria-label="658 799 8941" aria-describedby="basic-icon-default-phone2" />
                             </div>
+                            @error('foto')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
                     <div class="row justify-content-end">

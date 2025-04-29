@@ -25,19 +25,7 @@ class PeminjamanController extends Controller
         $this->middleware('auth');
     }
 
-    public function export()
-    {
-        $peminjaman = Peminjamans::with('barang')->where('status', 'Sedang Dipinjam')->get();
 
-        $pdf = Pdf::loadView('pdf.peminjaman', ['peminjaman' => $peminjaman]);
-
-        return $pdf->download('laporan-data-peminjaman.pdf');
-    }
-
-    public function exportExcel()
-    {
-        return Excel::download(new PeminjamanExport, 'laporan-data-peminjaman.xlsx');
-    }
     /**
      * Display a listing of the resource.
      *
@@ -46,21 +34,45 @@ class PeminjamanController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->input('search');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
         $query = Peminjamans::with('barang')
-                    ->where('status', 'Sedang Dipinjam'); // filter status dulu
-
-        if ($keyword) {
-            $query->whereHas('barang', function ($q) use ($keyword) {
-                $q->where('nama', 'like', "%$keyword%")
-                ->orWhere('merek', 'like', "%$keyword%");
+            ->where('status', 'Sedang Dipinjam')
+            ->when($keyword, function ($query) use ($keyword) {
+                $query->whereHas('barang', function ($q) use ($keyword) {
+                    $q->where('nama', 'like', "%$keyword%")
+                        ->orWhere('merek', 'like', "%$keyword%");
+                });
+            })
+            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('tanggal_pinjam', [$startDate, $endDate]);
+            })
+            ->when($startDate && !$endDate, function ($query) use ($startDate) {
+                $query->whereDate('tanggal_pinjam', '>=', $startDate);
+            })
+            ->when(!$startDate && $endDate, function ($query) use ($endDate) {
+                $query->whereDate('tanggal_pinjam', '<=', $endDate);
             });
-        }
 
         $peminjaman = $query->get();
 
-        return view('peminjaman.index', compact('peminjaman'));
+        // Export jika ada request export
+        if ($request->has('export')) {
+            if ($request->export == 'excel') {
+                return Excel::download(new PeminjamanExport($peminjaman), 'laporan-data-peminjaman.xlsx');
+            } elseif ($request->export == 'pdf') {
+                $pdf = Pdf::loadView('pdf.peminjaman', ['peminjaman' => $peminjaman]);
+                return $pdf->download('laporan-data-peminjaman.pdf');
+            }
+        }
+
+        // Jika tidak export, tampilkan view biasa
+        $peminjaman = $query->paginate(10)->withQueryString();
+
+        return view('peminjaman.index', compact('peminjaman', 'keyword', 'startDate', 'endDate'));
     }
+
 
 
     /**
@@ -85,6 +97,22 @@ class PeminjamanController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'jumlah' => 'required|integer|min:1',
+            'tanggal_pinjam' => 'required|date',
+            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
+            'nama_peminjam' => 'required|string|max:255',
+            'id_barang' => 'required|exists:barangs,id',
+        ],
+        [
+            'jumlah.required' => 'Jumlah tidak boleh kosong',
+            'tanggal_pinjam.required' => 'Tanggal pinjam tidak boleh kosong',
+            'tanggal_kembali.required' => 'Tanggal kembali tidak boleh kosong',
+            'tanggal_kembali.after_or_equal' => 'Tanggal kembali harus setelah atau sama dengan tanggal pinjam',
+            'nama_peminjam.required' => 'Nama peminjam tidak boleh kosong',
+            'id_barang.required' => 'Barang harus dipilih',
+            'id_barang.exists' => 'Barang tidak ditemukan',]);
+
         $peminjaman = new Peminjamans;
 
         $lastRecord = Peminjamans::latest('id')->first();
@@ -150,6 +178,22 @@ class PeminjamanController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'jumlah' => 'required|integer|min:1',
+            'tanggal_pinjam' => 'required|date',
+            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
+            'nama_peminjam' => 'required|string|max:255',
+            'id_barang' => 'required|exists:barangs,id',
+        ],
+        [
+            'jumlah.required' => 'Jumlah tidak boleh kosong',
+            'tanggal_pinjam.required' => 'Tanggal pinjam tidak boleh kosong',
+            'tanggal_kembali.required' => 'Tanggal kembali tidak boleh kosong',
+            'tanggal_kembali.after_or_equal' => 'Tanggal kembali harus setelah atau sama dengan tanggal pinjam',
+            'nama_peminjam.required' => 'Nama peminjam tidak boleh kosong',
+            'id_barang.required' => 'Barang harus dipilih',
+            'id_barang.exists' => 'Barang tidak ditemukan',]);
+
         $peminjaman = Peminjamans::findOrFail($id);
 
         $barangLama = Barangs::findOrFail($peminjaman->id_barang);

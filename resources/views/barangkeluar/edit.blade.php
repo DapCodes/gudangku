@@ -46,6 +46,12 @@
                                     value="{{ $barangKeluar->jumlah }}" />
                             </div>
                         </div>
+                        @error('jumlah')
+                            <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                <i class="bx bx-error-circle"></i>
+                                <p>{{ $message }}</p>
+                            </div>
+                        @enderror
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Tanggal keluar</label>
@@ -57,6 +63,12 @@
                                     value="{{ \Carbon\Carbon::parse($barangKeluar->tanggal_keluar)->format('Y-m-d') }}" />
                             </div>
                         </div>
+                        @error('tanggal_keluar')
+                            <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                <i class="bx bx-error-circle"></i>
+                                <p>{{ $message }}</p>
+                            </div>
+                        @enderror
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Keterangan</label>
@@ -68,10 +80,16 @@
                                     placeholder="Barang dalam keadaan baik" value="{{ $barangKeluar->keterangan }}" />
                             </div>
                         </div>
+                        @error('keterangan')
+                            <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                <i class="bx bx-error-circle"></i>
+                                <p>{{ $message }}</p>
+                            </div>
+                        @enderror
                     </div>
                     <div class="row justify-content-end">
                         <div class="col-sm-10">
-                            <button type="submit" class="btn btn-primary">Send</button>
+                            <button type="submit" class="btn btn-primary">Ubah</button>
                         </div>
                     </div>
                 </form>

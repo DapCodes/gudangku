@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Barangs;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -16,38 +16,33 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class BarangExport implements FromCollection, WithHeadings, WithStyles, WithColumnFormatting
 {
-    /**
-    * Mendapatkan data dari model Barangs.
-    *
-    * @return \Illuminate\Support\Collection
-    */
-    public function collection()
+    protected $barang; // Menampung data barang yang sudah difilter
+
+    // Konstruktor untuk menerima data yang sudah difilter
+    public function __construct(Collection $barang)
     {
-        return Barangs::select('kode_barang', 'nama', 'merek', 'stok')
-            ->get()
-            ->map(function($item) {
-                // Ubah nilai stok menjadi string jika 0, agar tetap tampil
-                $item->stok = (string) $item->stok;
-                return $item;
-            });
+        $this->barang = $barang;
     }
 
-    /**
-    * Menambahkan heading (judul kolom) ke file Excel.
-    *
-    * @return array
-    */
+    // Menggunakan data yang diterima di konstruktor
+    public function collection()
+    {
+        // Ambil hanya kolom yang relevan
+        return $this->barang->map(function($item) {
+            return [
+                'kode_barang' => $item->kode_barang,
+                'nama' => $item->nama,
+                'merek' => $item->merek,
+                'stok' => (string) $item->stok,  // pastikan stok diubah menjadi string
+            ];
+        });
+    }
+
     public function headings(): array
     {
         return ['Kode Barang', 'Nama Barang', 'Merek', 'Stok'];
     }
 
-    /**
-    * Styling untuk tabel Excel.
-    *
-    * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet
-    * @return array
-    */
     public function styles($sheet)
     {
         // Styling Header
@@ -75,7 +70,6 @@ class BarangExport implements FromCollection, WithHeadings, WithStyles, WithColu
         $sheet->getColumnDimension('D')->setAutoSize(true); // Ukuran kolom Stok
 
         return [
-            // Ukuran lebar kolom jika perlu disesuaikan lebih lanjut
             'A' => ['width' => 15],
             'B' => ['width' => 30],
             'C' => ['width' => 20],
@@ -83,11 +77,6 @@ class BarangExport implements FromCollection, WithHeadings, WithStyles, WithColu
         ];
     }
 
-    /**
-    * Menambahkan format untuk kolom tertentu.
-    *
-    * @return array
-    */
     public function columnFormats(): array
     {
         return [

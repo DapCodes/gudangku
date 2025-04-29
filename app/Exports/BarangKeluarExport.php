@@ -2,7 +2,6 @@
 
 namespace App\Exports;
 
-use App\Models\BarangKeluars;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -16,9 +15,16 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class BarangKeluarExport implements FromCollection, WithHeadings, WithStyles, WithColumnFormatting
 {
+    protected $barangKeluar;
+
+    public function __construct($barangKeluar)
+    {
+        $this->barangKeluar = $barangKeluar;
+    }
+
     public function collection()
     {
-        return BarangKeluars::with('barang')->get()->map(function ($item, $index) {
+        return $this->barangKeluar->map(function ($item, $index) {
             return [
                 'No' => $index + 1,
                 'Kode Barang' => optional($item->barang)->kode_barang,
@@ -34,13 +40,7 @@ class BarangKeluarExport implements FromCollection, WithHeadings, WithStyles, Wi
     public function headings(): array
     {
         return [
-            'No',
-            'Kode Barang',
-            'Nama Barang',
-            'Merek',
-            'Jumlah',
-            'Tanggal Keluar',
-            'Keterangan',
+            'No', 'Kode Barang', 'Nama Barang', 'Merek', 'Jumlah', 'Tanggal Keluar', 'Keterangan',
         ];
     }
 
@@ -48,18 +48,12 @@ class BarangKeluarExport implements FromCollection, WithHeadings, WithStyles, Wi
     {
         $highestRow = $sheet->getHighestRow();
 
-        // Header
         $sheet->getStyle('A1:G1')->getFont()->setBold(true)->setSize(12)->setColor(new Color('FFFFFF'));
         $sheet->getStyle('A1:G1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A1:G1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-        $sheet->getStyle('A1:G1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('F44336'); // Merah untuk Barang Keluar
-
-        // Border dan font data
+        $sheet->getStyle('A1:G1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('F44336');
         $sheet->getStyle('A2:G' . $highestRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        $sheet->getStyle('A2:G' . $highestRow)->getFont()->setSize(10);
         $sheet->getStyle('A1:G' . $highestRow)->getAlignment()->setWrapText(true);
 
-        // Auto-size kolom
         foreach (range('A', 'G') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
@@ -70,8 +64,8 @@ class BarangKeluarExport implements FromCollection, WithHeadings, WithStyles, Wi
     public function columnFormats(): array
     {
         return [
-            'E' => NumberFormat::FORMAT_NUMBER,           // Jumlah
-            'F' => NumberFormat::FORMAT_DATE_DDMMYYYY,     // Tanggal Keluar
+            'E' => NumberFormat::FORMAT_NUMBER,
+            'F' => NumberFormat::FORMAT_DATE_DDMMYYYY,
         ];
     }
 }

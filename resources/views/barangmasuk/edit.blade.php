@@ -33,6 +33,12 @@
                                 </select>
                             </div>
                         </div>
+                        @error('id_barang')
+                            <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                <i class="bx bx-error-circle"></i>
+                                <p>{{ $message }}</p>
+                            </div>
+                        @enderror
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Jumlah</label>
@@ -44,6 +50,12 @@
                                     aria-label="Samsung" aria-describedby="basic-icon-default-company2"
                                     value="{{ $barangMasuk->jumlah }}" />
                             </div>
+                            @error('jumlah')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -55,6 +67,12 @@
                                 <input name="tanggal_masuk" type="date" class="form-control" placeholder="0"
                                     value="{{ \Carbon\Carbon::parse($barangMasuk->tanggal_masuk)->format('Y-m-d') }}" />
                             </div>
+                            @error('tanggal_masuk')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -66,11 +84,17 @@
                                 <input name="keterangan" type="text" class="form-control"
                                     placeholder="Barang dalam keadaan baik" value="{{ $barangMasuk->keterangan }}" />
                             </div>
+                            @error('keterangan')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
                     <div class="row justify-content-end">
                         <div class="col-sm-10">
-                            <button type="submit" class="btn btn-primary">Send</button>
+                            <button type="submit" class="btn btn-primary">Ubah</button>
                         </div>
                     </div>
                 </form>

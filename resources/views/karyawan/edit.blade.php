@@ -28,6 +28,12 @@
                                     required />
                             </div>
                         </div>
+                        @error('name')
+                            <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                <i class="bx bx-error-circle"></i>
+                                <p>{{ $message }}</p>
+                            </div>
+                        @enderror
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Email</label>
@@ -38,6 +44,12 @@
                                 <input type="email" value="{{ $karyawan->email }}" class="form-control" id="email"
                                     name="email" placeholder="Masukan Email" utocomplete="email" required />
                             </div>
+                            @error('email')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -48,6 +60,12 @@
                                 <input id="current_password" type="password" class="form-control" name="current_password"
                                     placeholder="Masukan Password Lama">
                             </div>
+                            @error('current_password')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -58,6 +76,12 @@
                                 <input id="password" type="password" class="form-control" name="password"
                                     placeholder="Masukan Password Baru">
                             </div>
+                            @error('password')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -68,6 +92,12 @@
                                 <input id="password_confirmation" type="password" class="form-control"
                                     name="password_confirmation" placeholder="Konfirmasi Password Baru">
                             </div>
+                            @error('password_confirmation')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
 

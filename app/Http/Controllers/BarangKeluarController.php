@@ -18,45 +18,44 @@ Carbon::setLocale('id');
 class BarangKeluarController extends Controller
 {
 
-    public function export()
-    {
-        $barangKeluar = BarangKeluars::all();
-
-        $pdf = Pdf::loadView('pdf.barangKeluar', ['barangKeluar' => $barangKeluar]);
-
-        return $pdf->download('laporan-data-barangkeluar.pdf');
-    }
-
-    public function exportExcel()
-    {
-        return Excel::download(new BarangKeluarExport, 'laporan-data-barangkeluar.xlsx');
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index(Request $request)
     {
-         //Pertama, saya ambil data input dari form pencarian, yaitu:
-            $keyword = $request->input('search');
-
-            //Kemudian saya ambil data dari model barangKeluars, beserta relasi-nya ke tabel Barang, menggunakan:
-            $barangKeluar = BarangKeluars::with('barang')
-                // "when()" — fungsinya untuk menjalankan filter hanya kalau user mengisi pencarian. Anonymous function ini akan mengembalikan query builder.
-                ->when($keyword, function ($query) use ($keyword) {
-                    // "whereHas()" — fungsinya untuk memfilter relasi yang ada di model barangKeluars, yaitu: id_barang
-                    //saya pakai whereHas() karena saya ingin mencari dari relasi, yaitu: Nama barang (nama) atau merek barang (merek)
-                    $query->whereHas('barang', function ($q) use ($keyword) {
-                        $q->where('nama', 'like', "%$keyword%")
-                        ->orWhere('merek', 'like', "%$keyword%");
-                    });
-                })
-                ->get();
+        $keyword = $request->input('search');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $exportType = $request->input('export');
     
-            return view('barangkeluar.index', compact('barangKeluar', 'keyword'));
+        $barangKeluar = BarangKeluars::with('barang')
+            ->when($keyword, function ($query) use ($keyword) {
+                $query->whereHas('barang', function ($q) use ($keyword) {
+                    $q->where('nama', 'like', "%$keyword%")
+                      ->orWhere('merek', 'like', "%$keyword%");
+                });
+            })
+            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('tanggal_keluar', [$startDate, $endDate]);
+            })
+            ->when($startDate && !$endDate, function ($query) use ($startDate) {
+                $query->whereDate('tanggal_keluar', '>=', $startDate);
+            })
+            ->when(!$startDate && $endDate, function ($query) use ($endDate) {
+                $query->whereDate('tanggal_keluar', '<=', $endDate);
+            })
+            ->get();
+            
+    
+        if ($exportType == 'excel') {
+            return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\BarangKeluarExport($barangKeluar), 'laporan-data-barangkeluar.xlsx');
+        }
+    
+        if ($exportType == 'pdf') {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.barangKeluar', ['barangKeluar' => $barangKeluar]);
+            return $pdf->download('laporan-data-barangkeluar.pdf');
+        }
+    
+        return view('barangkeluar.index', compact('barangKeluar', 'keyword', 'startDate', 'endDate'));
     }
+    
 
     /**
      * Show the form for creating a new resource.
@@ -80,6 +79,25 @@ class BarangKeluarController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'jumlah' => 'required|integer|min:1',
+            'tanggal_keluar' => 'required|date',
+            'keterangan' => 'required|string|max:255',
+            'id_barang' => 'required|exists:barangs,id',
+        ],
+        [
+            'jumlah.required' => 'Jumlah barang harus diisi',
+            'jumlah.integer' => 'Jumlah barang harus berupa angka',
+            'jumlah.min' => 'Jumlah barang minimal 1',
+            'tanggal_keluar.required' => 'Tanggal keluar harus diisi',
+            'tanggal_keluar.date' => 'Format tanggal tidak valid',
+            'keterangan.required' => 'Keterangan harus diisi',
+            'keterangan.string' => 'Keterangan harus berupa teks',
+            'keterangan.max' => 'Keterangan maksimal 255 karakter',
+            'id_barang.required' => 'ID barang harus diisi',
+            'id_barang.exists' => 'ID barang tidak ditemukan',
+        ]);
+
         $barangKeluar = new BarangKeluars;
 
         $lastRecord = BarangKeluars::latest('id')->first();
@@ -144,6 +162,24 @@ class BarangKeluarController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'jumlah' => 'required|integer|min:1',
+            'tanggal_keluar' => 'required|date',
+            'keterangan' => 'nullable|string|max:255',
+            'id_barang' => 'required|exists:barangs,id',
+        ],
+        [
+            'jumlah.required' => 'Jumlah barang harus diisi',
+            'jumlah.integer' => 'Jumlah barang harus berupa angka',
+            'jumlah.min' => 'Jumlah barang minimal 1',
+            'tanggal_keluar.required' => 'Tanggal keluar harus diisi',
+            'tanggal_keluar.date' => 'Format tanggal tidak valid',
+            'keterangan.string' => 'Keterangan harus berupa teks',
+            'keterangan.max' => 'Keterangan maksimal 255 karakter',
+            'id_barang.required' => 'ID barang harus diisi',
+            'id_barang.exists' => 'ID barang tidak ditemukan',
+        ]);
+
         $barangKeluar = BarangKeluars::findOrFail($id);
 
         $barangKeluar->jumlah = $request->jumlah;

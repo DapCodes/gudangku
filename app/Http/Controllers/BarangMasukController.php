@@ -18,53 +18,51 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class BarangMasukController extends Controller
 {
      // cek auth
-     public function __construct()
-     {
-         $this->middleware('auth');
-     }
-     
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-
-    public function export()
+    public function __construct()
     {
-        $barangMasuk = BarangMasuks::all();
-
-        $pdf = Pdf::loadView('pdf.barangMasuk', ['barangMasuk' => $barangMasuk]);
-
-        return $pdf->download('laporan-data-barangMasuk.pdf');
-    }
-
-    public function exportExcel()
-    {
-        return Excel::download(new BarangMasukExport, 'laporan-data-barangMasuk.xlsx');
+        $this->middleware('auth');
     }
 
     public function index(Request $request)
     {
-        //Pertama, saya ambil data input dari form pencarian, yaitu:
         $keyword = $request->input('search');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
-        //Kemudian saya ambil data dari model BarangMasuks, beserta relasi-nya ke tabel Barang, menggunakan:
-        $barangMasuk = BarangMasuks::with('barang')
-            // "when()" — fungsinya untuk menjalankan filter hanya kalau user mengisi pencarian. Anonymous function ini akan mengembalikan query builder.
+        $query = BarangMasuks::with('barang')
             ->when($keyword, function ($query) use ($keyword) {
-                // "whereHas()" — fungsinya untuk memfilter relasi yang ada di model BarangMasuks, yaitu: id_barang
-                //saya pakai whereHas() karena saya ingin mencari dari relasi, yaitu: Nama barang (nama) atau merek barang (merek)
                 $query->whereHas('barang', function ($q) use ($keyword) {
                     $q->where('nama', 'like', "%$keyword%")
-                    ->orWhere('merek', 'like', "%$keyword%");
+                      ->orWhere('merek', 'like', "%$keyword%");
                 });
             })
-            ->get();
+            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('tanggal_masuk', [$startDate, $endDate]);
+            })
+            ->when($startDate && !$endDate, function ($query) use ($startDate) {
+                $query->whereDate('tanggal_masuk', '>=', $startDate);
+            })
+            ->when(!$startDate && $endDate, function ($query) use ($endDate) {
+                $query->whereDate('tanggal_masuk', '<=', $endDate);
+            });
 
-        return view('barangmasuk.index', compact('barangMasuk', 'keyword'));
+        $barangMasuk = $query->get();
+
+        // Kalau tombol export ditekan
+        if ($request->has('export')) {
+            if ($request->export == 'excel') {
+                return Excel::download(new BarangMasukExport($barangMasuk), 'laporan-data-barangMasuk.xlsx');
+            } elseif ($request->export == 'pdf') {
+                $pdf = Pdf::loadView('pdf.barangMasuk', ['barangMasuk' => $barangMasuk]);
+                return $pdf->download('laporan-data-barangMasuk.pdf');
+            }
+        }
+
+        $barangMasuk = $query->paginate(10)->withQueryString();
+
+        return view('barangmasuk.index', compact('barangMasuk', 'keyword', 'startDate', 'endDate'));
     }
-
-
+    
 
     /**
      * Show the form for creating a new resource.
@@ -85,6 +83,24 @@ class BarangMasukController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'id_barang' => 'required',
+            'jumlah' => 'required|integer|min:1',
+            'tanggal_masuk' => 'required|date',
+            'keterangan' => 'required|string|max:255',
+        ],
+        [
+            'id_barang.required' => 'Barang harus dipilih',
+            'jumlah.required' => 'Jumlah barang harus diisi',
+            'jumlah.integer' => 'Jumlah barang harus berupa angka',
+            'jumlah.min' => 'Jumlah barang minimal 1',
+            'tanggal_masuk.required' => 'Tanggal masuk harus diisi',
+            'tanggal_masuk.date' => 'Format tanggal tidak valid',
+            'keterangan.required' => 'Keterangan harus diisi',
+            'keterangan.string' => 'Keterangan harus berupa teks',
+            'keterangan.max' => 'Keterangan maksimal 255 karakter',
+        ]);
+
         $barangMasuk = new BarangMasuks;
 
         $lastRecord = BarangMasuks::latest('id')->first();
@@ -142,13 +158,27 @@ class BarangMasukController extends Controller
 
      public function update(Request $request, $id)
      {
+            $request->validate([
+                'id_barang' => 'required',
+                'jumlah' => 'required|integer|min:1',
+                'tanggal_masuk' => 'required|date',
+                'keterangan' => 'required|string|max:255',
+            ],
+            [
+                'id_barang.required' => 'Barang harus dipilih',
+                'jumlah.required' => 'Jumlah barang harus diisi',
+                'jumlah.integer' => 'Jumlah barang harus berupa angka',
+                'jumlah.min' => 'Jumlah barang minimal 1',
+                'tanggal_masuk.required' => 'Tanggal masuk harus diisi',
+                'tanggal_masuk.date' => 'Format tanggal tidak valid',
+                'keterangan.required' => 'Keterangan tidak boleh kosong',
+                'keterangan.string' => 'Keterangan harus berupa teks',
+                'keterangan.max' => 'Keterangan maksimal 255 karakter',
+            ]);
+            
          $barangMasuk = BarangMasuks::findOrFail($id);
          $barangLama = Barangs::findOrFail($barangMasuk->id_barang);
      
-         // Hitung stok awal sebelum barang masuk
-         // $stokSebelumMasuk = $barangLama->stok - $barangMasuk->jumlah;
-     
-         // Cek apakah stok barang masih valid
          if ($barangLama->stok < $barangMasuk->jumlah) {
              Alert::error('Gagal!', 'Stok barang kurang, data tidak bisa diubah.');
              return redirect()->route('brg-masuk.index');

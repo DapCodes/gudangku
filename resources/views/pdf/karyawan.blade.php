@@ -30,7 +30,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($karyawan as $i => $item)
+            @foreach ($users as $i => $item)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $item->name }}</td>

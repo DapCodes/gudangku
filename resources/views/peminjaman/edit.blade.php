@@ -30,6 +30,12 @@
                                 @endforeach
                             </select>
                         </div>
+                        @error('id_barang')
+                            <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                <i class="bx bx-error-circle"></i>
+                                <p>{{ $message }}</p>
+                            </div>
+                        @enderror
                     </div>
 
                     <!-- Jumlah -->
@@ -37,6 +43,12 @@
                         <label class="col-sm-2 col-form-label">Jumlah</label>
                         <div class="col-sm-10">
                             <input type="number" class="form-control" name="jumlah" value="{{ old('jumlah', $peminjaman->jumlah) }}">
+                            @error('jumlah')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
 
@@ -45,6 +57,12 @@
                         <label class="col-sm-2 col-form-label">Tanggal Pinjam</label>
                         <div class="col-sm-10">
                             <input type="date" class="form-control" name="tanggal_pinjam" value="{{ old('tanggal_pinjam', $peminjaman->tanggal_pinjam) }}">
+                            @error('tanggal_pinjam')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
 
@@ -53,6 +71,12 @@
                         <label class="col-sm-2 col-form-label">Tanggal Kembali</label>
                         <div class="col-sm-10">
                             <input type="date" class="form-control" name="tanggal_kembali" value="{{ old('tanggal_kembali', $peminjaman->tanggal_kembali) }}">
+                            @error('tanggal_kembali')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
 
@@ -61,6 +85,12 @@
                         <label class="col-sm-2 col-form-label">Nama Peminjam</label>
                         <div class="col-sm-10">
                             <input type="text" class="form-control" name="nama_peminjam" value="{{ old('nama_peminjam', $peminjaman->nama_peminjam) }}">
+                            @error('nama_peminjam')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
 
@@ -72,13 +102,19 @@
                                 <option value="Sedang Dipinjam" {{ $peminjaman->status == 'Sedang Dipinjam' ? 'selected' : '' }}>Sedang Dipinjam</option>
                                 <option value="Sudah Dikembalikan" {{ $peminjaman->status == 'Sudah Dikembalikan' ? 'selected' : '' }}>Sudah Dikembalikan</option>
                             </select>
+                            @error('status')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
 
                     <!-- Tombol Submit -->
                     <div class="row justify-content-end">
                         <div class="col-sm-10">
-                            <button type="submit" class="btn btn-primary">Ubah Status</button>
+                            <button type="submit" class="btn btn-primary">Ubah</button>
                         </div>
                     </div>
 

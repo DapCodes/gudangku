@@ -22,20 +22,6 @@ class BarangController extends Controller
         $this->middleware('auth');
     }
 
-    
-    public function export()
-    {
-        $barang = Barangs::all();
-
-        $pdf = Pdf::loadView('pdf.barang', ['barang' => $barang]);
-
-        return $pdf->download('laporan-data-barang.pdf');
-    }
-
-    public function exportExcel()
-    {
-        return Excel::download(new BarangExport, 'laporan-data-barang.xlsx');
-    }
 
     /**
      * Display a listing of the resource.
@@ -45,17 +31,28 @@ class BarangController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->input('search');
+        $exportType = $request->input('export');
 
-        if ($keyword) {
-            $barang = Barangs::where('nama', 'like', "%$keyword%")
-                        ->orWhere('merek', 'like', "%$keyword%")
-                        ->get();
-        } else {
-            $barang = Barangs::all();
+        $barangQuery = Barangs::when($keyword, function ($query) use ($keyword) {
+            $query->where('nama', 'like', "%$keyword%")
+                ->orWhere('merek', 'like', "%$keyword%");
+        });
+
+        $barang = $barangQuery->get();
+
+        if ($exportType == 'excel') {
+            return \Maatwebsite\Excel\Facades\Excel::download(new BarangExport($barang), 'laporan-data-barang.xlsx');
+        }
+
+        if ($exportType == 'pdf') {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.barang', ['barang' => $barang]);
+            return $pdf->download('laporan-data-barang.pdf');
         }
 
         return view('barang.index', compact('barang', 'keyword'));
     }
+
+    
 
 
     public function create()
@@ -74,8 +71,16 @@ class BarangController extends Controller
         $request->validate([
             'nama' => 'required',
             'merek' => 'required',
-            'foto' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'foto' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        ],
+        [
+            'nama.required' => 'Nama Barang tidak boleh kosong',
+            'merek.required' => 'Merek Barang tidak boleh kosong',
+            'foto.image' => 'File yang diupload harus berupa gambar',
+            'foto.mimes' => 'File yang diupload harus berupa jpeg, png, jpg, gif',
+            'foto.max' => 'Ukuran file tidak boleh lebih dari 2MB',
         ]);
+
 
         $barang = new Barangs;
 
@@ -129,6 +134,18 @@ class BarangController extends Controller
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'nama' => 'required',
+            'merek' => 'required',
+            'foto' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        ],
+        [
+            'nama.required' => 'Nama Barang tidak boleh kosong',
+            'merek.required' => 'Merek Barang tidak boleh kosong',
+            'foto.image' => 'File yang diupload harus berupa gambar',
+            'foto.mimes' => 'File yang diupload harus berupa jpeg, png, jpg, gif',
+            'foto.max' => 'Ukuran file tidak boleh lebih dari 2MB',
+        ]);
 
         $barang = Barangs::findOrFail($id);
         $barang->kode_barang = $request->kode_barang;

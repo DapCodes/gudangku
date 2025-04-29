@@ -6,42 +6,41 @@
     <div class="card">
         <div class="px-3 py-3 d-flex justify-content-between">
             <div>
+                <form action="{{ route('karyawan.index') }}" method="GET" class="d-flex justify-content-between gap-1">
                 <a href="{{ route('karyawan.create') }}">
                     <button type="button" class="btn btn-primary">
                         <i class="bx bx-folder-plus" style="position: relative; bottom: 2px;"></i>
                         Tambah Data
                     </button>
                 </a>
-                <a href="{{ route('karyawan.export') }}">
-                    <button type="button" class="btn btn-danger">
-                        <i class="bx bx-file" style="position: relative; bottom: 2px;"></i>
-                        Buat PDF
-                    </button>
-                </a>
-                <a href="{{ route('karyawan.export.excel') }}">
-                    <button type="button" class="btn btn-success">
-                        <i class="bx bx-file" style="position: relative; bottom: 2px;"></i>
-                        Buat Excel
-                    </button>
-                </a>
+
+                <!-- Tombol untuk PDF -->
+                <button type="submit" name="export" class="btn btn-danger" value="pdf">
+                    <i class="bx bxs-file-pdf" style="position: relative; bottom: 2px;"></i>
+                </button>
+
+                <!-- Tombol untuk Excel -->
+                <button type="submit" name="export" class="btn btn-success" value="excel">
+                    <i class="bx bx-spreadsheet" style="position: relative; bottom: 2px;"></i>
+                </button>
+
             </div>
-            <div class="d-flex align-items-center border-start ps-3">
+
+            <div class="d-flex align-items-center border-start ps-3 gap-1">
                 <i class="bx bx-search fs-4 lh-0 me-2"></i>
 
-                <form action="{{ route('karyawan.index') }}" method="get" class="d-flex align-items-center gap-2">
-                    <input type="text" name="search" class="form-control border-0 shadow-none" placeholder="Cari..."
-                        aria-label="Cari..." value="{{ request('search') }}" />
+                <input type="text" name="search" class="form-control border-0 shadow-none"
+                    placeholder="Cari..." aria-label="Cari..." value="{{ request('search') }}" />
 
-                    <button class="btn btn-primary" type="submit">Cari</button>
+                <button class="btn btn-primary" type="submit">Cari</button>
 
-                    @if (request()->has('search') && request()->search != '')
-                        <a href="{{ route('karyawan.index') }}" class="btn btn-secondary">
-                            <i class="bx bx-refresh"></i>
-                        </a>
-                    @endif
+                @if ((request()->has('search') && request()->search != '') || request()->has('start_date') || request()->has('end_date'))
+                    <a href="{{ route('karyawan.index') }}" class="btn btn-secondary">
+                        <i class="bx bx-refresh"></i>
+                    </a>
+                @endif
                 </form>
             </div>
-
         </div>
         <div class="table-responsive text-nowrap">
             <table class="table table-striped">

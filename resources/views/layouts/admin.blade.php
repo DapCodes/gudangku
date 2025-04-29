@@ -185,9 +185,9 @@
             });
         }
 
-        function pilihBarang(id, nama) {
+        function pilihBarang(id, nama, merek) {
             document.getElementById('id_barang').value = id; // set id_barang hidden
-            document.getElementById('dropdownBarang').innerText = nama; // ganti teks tombol jadi nama barang
+            document.getElementById('dropdownBarang').innerText = `${nama} - ${merek}`; // ganti teks tombol jadi nama barang
         }
     </script>
 
