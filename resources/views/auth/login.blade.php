@@ -55,11 +55,9 @@
                 <div class="card">
                     <div class="card-body">
                         <!-- Logo -->
-                        <div class="app-brand justify-content-center">
-                            <a href="index.html" class="app-brand-link mt-3">
-                                <img style="width: 260px;"
-                                    src="{{ asset('admin/assets/img/icons/brands/gudangku-icon.png') }}" alt="">
-                            </a>
+                        <div class="app-brand justify-content-center mb-4 mt-2">
+                            <img style="width: 260px"
+                            src="{{ asset('admin/assets/img/icons/brands/gudangku-icon.png') }}" alt="">
                         </div>
                         <!-- /Logo -->
                         <form id="formAuthentication" class="mb-3" method="POST" action="{{ route('login') }}">

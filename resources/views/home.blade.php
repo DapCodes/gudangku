@@ -18,8 +18,9 @@
                       <div class="card">
                         <div class="card-body">
                           <div class="card-title d-flex align-items-start justify-content-between">
-                            <div class="avatar flex-shrink-0">
+                            <div class="flex-shrink-0">
                               <img
+                                style="width: 65px; position: relative; right: 10px"
                                 src="../admin/assets/img/gif-icons/barang.png"
                                 alt="chart success"
                                 class="rounded"

@@ -1,5 +1,5 @@
         <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-            <div class="app-brand demo" style="position: relative; right: 10px;">
+            <div class="app-brand demo mb-2 mt-2" style="position: relative; right: 10px;">
                 <a href="index.html" class="app-brand-link">
                     <img style="width: 200px" src="{{ asset('admin/assets/img/icons/brands/gudangku-icon.png') }}"
                         alt="">
@@ -72,4 +72,11 @@
                     </a>
                 </li>
             </ul>
+            <div class="row align-items-center justify-content-center">
+            <div class="card" style="width: 220px; height: 120px; position: absolute; bottom:40px;">
+                    <div class="card-header"></div>
+                    <div class="card-body">
+                    </div>
+                  </div>
+            </div>
         </aside>
