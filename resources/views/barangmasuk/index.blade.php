@@ -4,7 +4,7 @@
 @section('content')
     @include('sweetalert::alert')
 
-    <div class="card">
+    <div class="card mb-5">
         <div class="px-3 py-3 d-flex justify-content-between">
             <div>
                 <form action="{{ route('brg-masuk.index') }}" method="GET" class="d-flex justify-content-between gap-1">
@@ -50,7 +50,7 @@
             </div>
         </div>
 
-        <div class="table-responsive text-nowrap">
+        <div class="table-responsive text-nowrap mb-2">
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -73,7 +73,7 @@
                             <td>{{ $item->barang->merek }}</td>
                             <td>{{ $item->jumlah }}</td>
                             <td>{{ \Carbon\Carbon::parse($item->tanggal_masuk)->translatedFormat('l, d F Y') }}</td>
-                            <td>{{ Str::limit($item->keterangan, 20) }}</td>
+                            <td>{{ Str::limit($item->keterangan, 30) }}</td>
                             <td>
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow"

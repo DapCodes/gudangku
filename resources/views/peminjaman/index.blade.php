@@ -61,6 +61,7 @@
                         <th>Tanggal Kembali</th>
                         <th>Nama Peminjam</th>
                         <th>Status</th>
+                        <th>Tenggat</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -79,6 +80,14 @@
                                 class="{{ $item->status == 'Sedang Dipinjam' ? 'text-danger' : ($item->status == 'Sudah Dikembalikan' ? 'text-success' : '') }}">
                                 {{ $item->status }}
                             </td>
+                            <td>
+                                @if($item->tenggat === 'Terlambat')
+                                    <span class="text-danger">{{ $item->tenggat }}</span>
+                                @else
+                                    <span class="text-success">{{ $item->tenggat }}</span>
+                                @endif
+                            </td>
+
                             <td style="overflow: visible;">
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow"

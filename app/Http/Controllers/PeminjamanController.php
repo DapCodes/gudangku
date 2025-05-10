@@ -40,7 +40,7 @@ class PeminjamanController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $exportType = $request->input('export');
-    
+
         $query = Peminjamans::with('barang')
             ->where('status', 'Sedang Dipinjam')
             ->when($keyword, function ($query) use ($keyword) {
@@ -63,11 +63,26 @@ class PeminjamanController extends Controller
                     $q->where('status_barang', $user->status_user);
                 });
             });
-    
+
         // Mengecek jika ada permintaan untuk export
         if ($exportType) {
             $peminjaman = $query->get(); // Mengambil data yang sudah difilter
-    
+
+            // Menambahkan 'tenggat' di sini sebelum export
+            $peminjaman->transform(function ($item) {
+                $now = Carbon::now(); // Ambil waktu sekarang
+                $tanggalKembali = Carbon::parse($item->tanggal_kembali); // Parse tanggal_kembali
+
+                // Cek jika status 'Sedang Dipinjam' dan tanggal sekarang lebih besar dari tanggal_kembali
+                if ($item->status === 'Sedang Dipinjam' && $now->gt($tanggalKembali)) {
+                    $item->tenggat = 'Terlambat';
+                } else {
+                    $item->tenggat = 'Dalam Masa Pinjam';
+                }
+
+                return $item;
+            });
+
             if ($exportType == 'excel') {
                 return Excel::download(new PeminjamanExport($peminjaman), 'laporan-data-peminjaman.xlsx');
             } elseif ($exportType == 'pdf') {
@@ -75,14 +90,28 @@ class PeminjamanController extends Controller
                 return $pdf->download('laporan-data-peminjaman.pdf');
             }
         }
-    
-        // Jika tidak export, lakukan pagination seperti biasa
+
+        // Jika tidak export, lakukan pagination dan tambahkan tenggat pada data yang ditampilkan
         $peminjaman = $query->paginate(10)->withQueryString();
-    
+
+        // Menambahkan 'tenggat' di sini sebelum ditampilkan di view
+        $peminjaman->getCollection()->transform(function ($item) {
+            $now = Carbon::now(); // Ambil waktu sekarang
+            $tanggalKembali = Carbon::parse($item->tanggal_kembali); // Parse tanggal_kembali
+
+            // Cek jika status 'Sedang Dipinjam' dan tanggal sekarang lebih besar dari tanggal_kembali
+            if ($item->status === 'Sedang Dipinjam' && $now->gt($tanggalKembali)) {
+                $item->tenggat = 'Terlambat';
+            } else {
+                $item->tenggat = 'Dalam Masa Pinjam';
+            }
+
+            return $item;
+        });
+
         return view('peminjaman.index', compact('peminjaman', 'keyword', 'startDate', 'endDate'));
     }
-    
-    
+
 
 
 
@@ -277,6 +306,7 @@ class PeminjamanController extends Controller
                 'id_barang' => $request->id_barang,
                 'jumlah' => $request->jumlah,
                 'tanggal_pinjam' => $request->tanggal_pinjam,
+                'tanggal_kembali' => $request->tanggal_kembali,
                 'status' => $request->status,
                 'nama_peminjam' => $request->nama_peminjam,
             ]);

@@ -31,11 +31,11 @@ class BarangController extends Controller
      */
     public function index(Request $request)
     {
-        $user = Auth::user(); // Ambil user login
+        $user = Auth::user();
         $keyword = $request->input('search');
         $exportType = $request->input('export');
+        $statusFilter = $request->input('status_barang'); // Tambahan filter status_barang
 
-        // Mulai query barang
         $barangQuery = Barangs::query();
 
         // Filter berdasarkan status_user jika bukan admin
@@ -43,31 +43,41 @@ class BarangController extends Controller
             $barangQuery->where('status_barang', $user->status_user);
         }
 
-        // Tambahkan filter pencarian jika ada keyword
+        // Filter berdasarkan status_barang (dari tombol)
+        if ($statusFilter) {
+            $barangQuery->where('status_barang', $statusFilter);
+        }
+
+        // Filter pencarian
         if ($keyword) {
             $barangQuery->where(function ($query) use ($keyword) {
                 $query->where('nama', 'like', "%$keyword%")
-                    ->orWhere('merek', 'like', "%$keyword%");
+                    ->orWhere('merek', 'like', "%$keyword%")
+                    ->orWhere('kode_barang', 'like', "%$keyword%")
+                    ->orWhere('status_barang', 'like', "%$keyword%");
             });
         }
 
-        // Ambil data
-        $barang = $barangQuery->get();
+        // Ambil data untuk export
+        if ($exportType) {
+            $barang = $barangQuery->get(); // Tidak paginate agar semua diekspor
 
-        // Export Excel
-        if ($exportType == 'excel') {
-            return Excel::download(new BarangExport($barang), 'laporan-data-barang.xlsx');
+            if ($exportType == 'excel') {
+                return Excel::download(new BarangExport($barang), 'laporan-data-barang.xlsx');
+            }
+
+            if ($exportType == 'pdf') {
+                $pdf = Pdf::loadView('pdf.barang', ['barang' => $barang]);
+                return $pdf->download('laporan-data-barang.pdf');
+            }
         }
 
-        // Export PDF
-        if ($exportType == 'pdf') {
-            $pdf = Pdf::loadView('pdf.barang', ['barang' => $barang]);
-            return $pdf->download('laporan-data-barang.pdf');
-        }
+        // Ambil data barang dengan pagination
+        $barang = $barangQuery->orderBy('id', 'asc')->paginate(100);
 
-        // Tampilkan view
-        return view('barang.index', compact('barang', 'keyword'));
+        return view('barang.index', compact('barang', 'keyword', 'statusFilter'));
     }
+
 
     public function create()
     {
@@ -92,7 +102,7 @@ class BarangController extends Controller
         $request->validate([
             'nama' => 'required',
             'merek' => 'required',
-            'foto' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ],
         [
             'nama.required' => 'Nama Barang tidak boleh kosong',
@@ -194,6 +204,8 @@ class BarangController extends Controller
             $img->move('image/barang', $name);
             $barang->foto = $name;
         }
+
+        $barang->status_barang = $request->status_barang;
         
         $barang->save(); 
 

@@ -1,15 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-
+use Illuminate\Http\Request;
 use App\Models\BarangKeluars;
 use App\Models\Barangs;
 use App\Exports\BarangKeluarExport;
-
 use RealRashid\SweetAlert\Facades\Alert;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;

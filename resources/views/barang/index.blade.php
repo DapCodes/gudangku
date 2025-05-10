@@ -3,7 +3,7 @@
 
 @section('content')
     @include('sweetalert::alert')
-    <div class="card">
+    <div class="card mb-5">
         <div class="px-3 py-3 d-flex justify-content-between">
             <div>
                 <form action="{{ route('barang.index') }}" method="GET" class="d-flex justify-content-between gap-1">
@@ -42,7 +42,31 @@
                 </form>
             </div>
         </div>
-        <div class="table-responsive text-nowrap">
+        <div class="d-flex align-items-center gap-1 my-2" style="position:relative; left: 17px;">
+        @php
+            $status = Auth::user()->status_user;
+            @endphp
+            @if ($status == 'admin')
+        @php
+                $statusList = ['TBSM', 'RPL', 'TKRO', 'UMUM']; // Sesuaikan dengan status yang ada
+                $activeStatus = request()->get('status_barang');
+            @endphp
+            @foreach ($statusList as $s)
+                <a href="{{ route('barang.index', array_merge(request()->query(), ['status_barang' => $s])) }}"
+                    class="btn btn-sm {{ $activeStatus == $s ? 'btn-primary' : 'btn-outline-primary' }}">
+                    {{ strtoupper($s) }}
+                </a>
+            @endforeach
+
+            {{-- Tombol untuk reset filter status --}}
+            @if (request()->has('status_barang'))
+                <a href="{{ route('barang.index', array_merge(request()->except('status_barang'))) }}"
+                    class="btn btn-sm btn-secondary">Reset</a>
+            @endif
+        @endif
+        </div>
+
+        <div class="table-responsive text-nowrap mb-2">
             <table class="table table-striped">
                 <thead>
                     <tr>

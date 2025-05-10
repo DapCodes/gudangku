@@ -87,6 +87,7 @@
                                 <div class="input-group input-group-merge">
                                     <select name="status_barang" id="status_barang" class="form-control">
                                         <option>Pilih Status Barang</option>
+                                        <option value="Umum">Barang Umum</option>
                                         <option value="RPL">Barang RPL</option>
                                         <option value="TBSM">Barang TBSM</option>
                                         <option value="TKRO">Barang TKRO</option>

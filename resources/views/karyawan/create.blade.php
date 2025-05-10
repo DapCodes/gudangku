@@ -73,6 +73,7 @@
                                 <select name="status_user" id="status_user"
                                     class="form-control @error('status_user') is-invalid @enderror">
                                     <option>Pilih Status Petugas</option>
+                                    <option value="Umum">Petugas Umum</option>
                                     <option value="RPL">Petugas RPL</option>
                                     <option value="TBSM">Petugas TBSM</option>
                                     <option value="TKRO">Petugas TKRO</option>

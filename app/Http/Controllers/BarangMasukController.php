@@ -6,15 +6,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Barangs;
 use App\Models\BarangMasuks;
-
-\Carbon\Carbon::setLocale('id');
-
 use RealRashid\SweetAlert\Facades\Alert;
 use App\Exports\BarangMasukExport;
 use App\Exports\BarangExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 
+\Carbon\Carbon::setLocale('id');
 
 class BarangMasukController extends Controller
 {
@@ -67,7 +65,7 @@ class BarangMasukController extends Controller
         }
 
         // Jika tidak export, tampilkan dengan paginate
-        $barangMasuk = $query->paginate(10)->withQueryString();
+        $barangMasuk = $query->paginate(100)->withQueryString();
 
         return view('barangmasuk.index', compact('barangMasuk', 'keyword', 'startDate', 'endDate'));
     }

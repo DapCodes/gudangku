@@ -164,6 +164,11 @@ class KaryawanController extends Controller
          if ($request->filled('password')) {
              $user->password = Hash::make($request->password);
          }
+
+        // Update status_user jika ada perubahan
+        if ($request->has('status_user')) {
+            $user->status_user = $request->status_user;
+        }
      
          $user->save();
      

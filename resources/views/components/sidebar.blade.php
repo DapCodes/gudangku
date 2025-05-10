@@ -73,10 +73,15 @@
                 </li>
             </ul>
             <div class="row align-items-center justify-content-center">
-            <div class="card" style="width: 220px; height: 120px; position: absolute; bottom:40px;">
-                    <div class="card-header"></div>
-                    <div class="card-body">
-                    </div>
-                  </div>
+            <div id="welcomeCard" class="card shadow card-welcome" style="width: 220px; height: 150px; position: absolute; bottom: 40px; border-radius: 12px; background-color: #f8f9fa; overflow: hidden;">
+                <div class="card-header d-flex align-items-center justify-content-center" style="height: 35px; background-color: #007bff; border-bottom: none; border-top-left-radius: 12px; border-top-right-radius: 12px; position: relative;">
+                    <h5 class="text-white mb-0" style="font-size: 14px;">Selamat Datang!</h5>
+                    <button class="close-btn" onclick="document.getElementById('welcomeCard').style.display='none';">&times;</button>
+                </div>
+                <div class="card-body d-flex justify-content-center align-items-center p-2">
+                    <img src="/admin/assets/img/elements/99.png" class="w-75" alt="gambar elemen" style="object-fit: contain; position: relative; bottom: 23px;">
+                </div>
             </div>
+
         </aside>
+

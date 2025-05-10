@@ -121,3 +121,48 @@
   font-weight: bold;
   display: inline-block;
 }
+
+.card-welcome {
+  animation: fadeSlideUp 1s ease-in-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@keyframes fadeSlideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-header h5 {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background-color: #ffffff;
+  /* merah lembut */
+  border: none;
+  color: rgb(0, 0, 0);
+  font-size: 14px;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.close-btn:hover {
+  background-color: #d6d6d6;
+  /* merah sedikit lebih tua saat hover */
+}
