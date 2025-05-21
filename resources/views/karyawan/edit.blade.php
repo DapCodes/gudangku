@@ -58,7 +58,7 @@
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text cursor-pointer"><i class="bx bx-lock-open"></i></span>
                                 <input id="current_password" type="password" class="form-control" name="current_password"
-                                    placeholder="Masukan Password Lama">
+                                    placeholder="Masukan Password Lama (Wajib)">
                             </div>
                             @error('current_password')
                                 <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
@@ -74,7 +74,7 @@
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                 <input id="password" type="password" class="form-control" name="password"
-                                    placeholder="Masukan Password Baru">
+                                    placeholder="Masukan Password Baru (Opsional)">
                             </div>
                             @error('password')
                                 <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
@@ -90,7 +90,7 @@
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text cursor-pointer"><i class="bx bx-lock"></i></span>
                                 <input id="password_confirmation" type="password" class="form-control"
-                                    name="password_confirmation" placeholder="Konfirmasi Password Baru">
+                                    name="password_confirmation" placeholder="Konfirmasi Password Baru (Opsional)">
                             </div>
                             @error('password_confirmation')
                                 <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">

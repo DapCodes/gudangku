@@ -20,8 +20,10 @@ return new class extends Migration
             $table->unsignedBigInteger('jumlah');
             $table->date('tanggal_masuk');
             $table->string('keterangan');
+            $table->unsignedBigInteger('ruangan_id');
             $table->timestamps();
             $table->foreign('id_barang')->references('id')->on('barangs')->onDelete('cascade');
+            $table->foreign('ruangan_id')->references('id')->on('ruangans')->onDelete('cascade');
 
         });
     }

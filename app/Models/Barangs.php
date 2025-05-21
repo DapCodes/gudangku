@@ -36,6 +36,10 @@ class Barangs extends Model
     {
         return $this->hasMany(Pengembalian::class);
     }
+    public function barangruangan()
+    {
+        return $this->hasMany(BarangRuangan::class);
+    }
 
     public function deleteImage(){
         if($this->cover && file_exists(public_path('image/barang' . $this->cover))) {

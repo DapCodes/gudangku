@@ -12,7 +12,7 @@
 
             <div class="menu-inner-shadow"></div>
 
-            <ul class="menu-inner py-1">
+            <ul class="menu-inner py-1 gap-1">
                 <!-- Dashboard -->
                 <!-- Dashboard -->
                 <li class="menu-item {{ Request::is('admin/home*') ? 'active' : '' }}">
@@ -22,15 +22,8 @@
                     </a>
                 </li>
                 <!-- Components -->
-                <li class="menu-header small text-uppercase"><span class="menu-header-text">Mengelola</span></li>
+                <li class="menu-header small text-uppercase mb-3"><span class="menu-header-text">Mengelola</span></li>
                 <!-- Cards -->
-                <!-- Data Barang -->
-                <li class="menu-item {{ Request::is('admin/barang*') ? 'active' : '' }}">
-                    <a href="{{ route('barang.index') }}" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-collection"></i>
-                        <div>Data Barang</div>
-                    </a>
-                </li>
                 @if (Auth::user()->is_admin == 1)
                     <!-- Data Karyawan -->
                     <li class="menu-item {{ Request::is('admin/karyawan*') ? 'active' : '' }}">
@@ -40,6 +33,25 @@
                         </a>
                     </li>
                 @endif
+                <!-- Data Barang -->
+                <li class="menu-item {{ Request::is('admin/barang*') ? 'active' : '' }}">
+                    <a href="{{ route('barang.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-collection"></i>
+                        <div>Data Barang</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ Request::is('admin/ruangan*') ? 'active' : '' }}">
+                    <a href="{{ route('ruangan.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-collection"></i>
+                        <div>Data Ruangan</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ Request::is('admin/brg-ruangan*') ? 'active' : '' }}">
+                    <a href="{{ route('brg-ruangan.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-collection"></i>
+                        <div>Data Barang Ruangan</div>
+                    </a>
+                </li>
                 <!-- Barang Masuk -->
                 <li class="menu-item {{ Request::is('admin/brg-masuk*') ? 'active' : '' }}">
                     <a href="{{ route('brg-masuk.index') }}" class="menu-link">
@@ -72,16 +84,6 @@
                     </a>
                 </li>
             </ul>
-            <div class="row align-items-center justify-content-center">
-            <div id="welcomeCard" class="card shadow card-welcome" style="width: 220px; height: 150px; position: absolute; bottom: 40px; border-radius: 12px; background-color: #f8f9fa; overflow: hidden;">
-                <div class="card-header d-flex align-items-center justify-content-center" style="height: 35px; background-color: #007bff; border-bottom: none; border-top-left-radius: 12px; border-top-right-radius: 12px; position: relative;">
-                    <h5 class="text-white mb-0" style="font-size: 14px;">Selamat Datang!</h5>
-                    <button class="close-btn" onclick="document.getElementById('welcomeCard').style.display='none';">&times;</button>
-                </div>
-                <div class="card-body d-flex justify-content-center align-items-center p-2">
-                    <img src="/admin/assets/img/elements/99.png" class="w-75" alt="gambar elemen" style="object-fit: contain; position: relative; bottom: 23px;">
-                </div>
-            </div>
 
         </aside>
 

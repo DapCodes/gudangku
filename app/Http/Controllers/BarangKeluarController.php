@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
 use App\Models\BarangKeluars;
 use App\Models\Barangs;
+use App\Models\BarangRuangans;
+use App\Models\Ruangans;
 use App\Exports\BarangKeluarExport;
 use RealRashid\SweetAlert\Facades\Alert;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -79,11 +82,13 @@ class BarangKeluarController extends Controller
         $user = Auth::user();
         if ($user->status_user === 'admin') {
             $barang = Barangs::all(); 
+            $ruangan = Ruangans::all();
         } else {
             $barang = Barangs::where('status_barang', $user->status_user)->get();
+            $ruangan = Ruangans::where('deskripsi', $user->status_user)->get();
         }
 
-        return view('barangkeluar.create', compact('barang'));
+        return view('barangkeluar.create', compact('barang', 'ruangan'));
     }
 
     /**
@@ -92,6 +97,7 @@ class BarangKeluarController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+
     public function store(Request $request)
     {
         $request->validate([
@@ -113,33 +119,60 @@ class BarangKeluarController extends Controller
             'id_barang.exists' => 'ID barang tidak ditemukan',
         ]);
 
-        $barangKeluar = new BarangKeluars;
+        try {
+            DB::beginTransaction();
 
-        $lastRecord = BarangKeluars::latest('id')->first();
-        $lastId = $lastRecord ? $lastRecord->id : 0;
-        $kodeBarang = 'BK-' . str_pad($lastId + 1, 4, '0', STR_PAD_LEFT);
+            // Validasi dan pengurangan stok ruangan
+            if ($request->deskripsi) {
+                $barangRuangan = BarangRuangans::where('barang_id', $request->id_barang)
+                    ->where('ruangan_id', $request->deskripsi)
+                    ->first();
 
-        $barangKeluar->kode_barang = $kodeBarang;
+                if ($barangRuangan) {
+                    if ($barangRuangan->stok < $request->jumlah) {
+                        return back()->with('error', 'Jumlah melebihi stok tersedia di ruangan.');
+                    }
 
-        $barangKeluar->jumlah = $request->jumlah;
-        $barangKeluar->tanggal_keluar = $request->tanggal_keluar;
-        $barangKeluar->keterangan = $request->keterangan;
-        $barangKeluar->id_barang = $request->id_barang;
+                    $barangRuangan->stok -= $request->jumlah;
+                    $barangRuangan->save();
+                } else {
+                    return back()->with('error', 'Barang tidak tersedia di ruangan ini.');
+                }
+            }
 
+            // Cek dan kurangi stok dari tabel utama `barangs`
+            $barang = Barangs::findOrFail($request->id_barang);
+            if ($barang->stok < $request->jumlah) {
+                Alert::error('Gagal!', 'Stok tidak mencukupi');
+                return back();
+            }
 
-        $barang = Barangs::findOrFail($request->id_barang);
+            $barang->stok -= $request->jumlah;
+            $barang->save();
 
-        if ($barang->stok < $request->jumlah) {
-            Alert::error('Gagal!', 'Stok tidak mencukupi');
-            return redirect()->back();
+            // Generate kode_barang keluar
+            $lastRecord = BarangKeluars::latest('id')->first();
+            $lastId = $lastRecord ? $lastRecord->id : 0;
+            $kodeBarang = 'BK-' . str_pad($lastId + 1, 4, '0', STR_PAD_LEFT);
+
+            // Simpan data barang keluar
+            $barangKeluar = new BarangKeluars();
+            $barangKeluar->kode_barang = $kodeBarang;
+            $barangKeluar->jumlah = $request->jumlah;
+            $barangKeluar->tanggal_keluar = $request->tanggal_keluar;
+            $barangKeluar->keterangan = $request->keterangan;
+            $barangKeluar->id_barang = $request->id_barang;
+            $barangKeluar->ruangan_id = $request->deskripsi ?? null;
+            $barangKeluar->save();
+
+            DB::commit();
+
+            Alert::success('Berhasil!', 'Data Berhasil Ditambahkan');
+            return redirect()->route('brg-keluar.index');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-        // Update stok barang
-        $barang->stok -= $request->jumlah;
-        $barang->save();
-
-        $barangKeluar->save();
-        Alert::success('Berhasil!', 'Data Berhasil Ditambahkan');
-        return redirect()->route('brg-keluar.index');
     }
 
     /**
@@ -154,33 +187,27 @@ class BarangKeluarController extends Controller
         return view('barangkeluar.show', compact('barangKeluar'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
         $user = Auth::user();
+        $barangKeluar = BarangKeluars::findOrFail($id);
+
         if ($user->status_user === 'admin') {
-            $barangKeluar = BarangKeluars::findOrFail($id);
             $barang = Barangs::all();
+            $ruangan = Ruangans::all();
         } else {
-            $barangKeluar = BarangKeluars::findOrFail($id);
             $barang = Barangs::where('status_barang', $user->status_user)->get();
+            $ruangan = Ruangans::where('deskripsi', $user->status_user)->get();
         }
 
-        return view('barangkeluar.edit', compact('barang', 'barangKeluar'));
+        $barangRuangan = BarangRuangans::where('barang_id', $barangKeluar->id_barang)
+            ->where('ruangan_id', $barangKeluar->ruangan_id)
+            ->first();
+
+        return view('barangkeluar.edit', compact('barang', 'ruangan', 'barangKeluar', 'barangRuangan'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -188,8 +215,8 @@ class BarangKeluarController extends Controller
             'tanggal_keluar' => 'required|date',
             'keterangan' => 'nullable|string|max:255',
             'id_barang' => 'required|exists:barangs,id',
-        ],
-        [
+            'ruangan_id' => 'required|exists:ruangans,id',
+        ], [
             'jumlah.required' => 'Jumlah barang harus diisi',
             'jumlah.integer' => 'Jumlah barang harus berupa angka',
             'jumlah.min' => 'Jumlah barang minimal 1',
@@ -199,38 +226,65 @@ class BarangKeluarController extends Controller
             'keterangan.max' => 'Keterangan maksimal 255 karakter',
             'id_barang.required' => 'ID barang harus diisi',
             'id_barang.exists' => 'ID barang tidak ditemukan',
+            'ruangan_id.required' => 'Ruangan harus dipilih',
+            'ruangan_id.exists' => 'Ruangan tidak valid',
         ]);
 
+        // Ambil data lama
         $barangKeluar = BarangKeluars::findOrFail($id);
-        $barangLama = Barangs::findOrFail($barangKeluar->id_barang); // Barang lama (sebelum diedit)
+        $barangLama = Barangs::findOrFail($barangKeluar->id_barang);
 
-        // Kembalikan stok barang lama
+        // Kembalikan stok barang utama
         $barangLama->stok += $barangKeluar->jumlah;
         $barangLama->save();
 
-        // Ambil barang baru (yang dipilih pada form)
-        $barangBaru = Barangs::findOrFail($request->id_barang);
+        // Kembalikan stok ke barang_ruangan lama
+        $oldBarangRuangan = BarangRuangans::where('barang_id', $barangKeluar->id_barang)
+            ->where('ruangan_id', $barangKeluar->ruangan_id)
+            ->first();
 
-        // Cek stok cukup atau tidak
+        if ($oldBarangRuangan) {
+            $oldBarangRuangan->stok += $barangKeluar->jumlah;
+            $oldBarangRuangan->save();
+        }
+
+        // Cek stok barang baru
+        $barangBaru = Barangs::findOrFail($request->id_barang);
         if ($barangBaru->stok < $request->jumlah) {
             Alert::error('Gagal!', 'Stok barang tidak mencukupi untuk dikeluarkan.');
             return redirect()->back();
         }
 
-        // Kurangi stok barang baru
+        // Kurangi stok barang utama baru
         $barangBaru->stok -= $request->jumlah;
         $barangBaru->save();
 
-        // Update data barang keluar
+        // Kurangi stok dari barangRuangan baru
+        $newBarangRuangan = BarangRuangans::where('barang_id', $request->id_barang)
+            ->where('ruangan_id', $request->ruangan_id)
+            ->first();
+
+        if (!$newBarangRuangan || $newBarangRuangan->stok < $request->jumlah) {
+            Alert::error('Gagal!', 'Stok barang di ruangan tidak mencukupi.');
+            return redirect()->back();
+        }
+
+        $newBarangRuangan->stok -= $request->jumlah;
+        $newBarangRuangan->save();
+
+        // Simpan perubahan pada barang keluar
         $barangKeluar->id_barang = $request->id_barang;
         $barangKeluar->jumlah = $request->jumlah;
         $barangKeluar->tanggal_keluar = $request->tanggal_keluar;
         $barangKeluar->keterangan = $request->keterangan;
+        $barangKeluar->ruangan_id = $request->ruangan_id;
         $barangKeluar->save();
 
         Alert::success('Berhasil!', 'Data berhasil diperbarui.');
         return redirect()->route('brg-keluar.index');
     }
+
+
 
 
     /**

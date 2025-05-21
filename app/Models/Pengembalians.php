@@ -18,9 +18,15 @@ class Pengembalians extends Model
        'status',
        'id_peminjam',
        'id_barang', 
+       'ruangan_id',
     ];
 
     public $timestamps = true;
+
+    public function ruangan()
+    {
+        return $this->belongsTo(Ruangans::class, 'ruangan_id');
+    }
 
 
     public function barang() {

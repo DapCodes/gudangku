@@ -57,6 +57,26 @@
                     </div>
 
                     <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Pilih Ruanagn</label>
+                            <div class="col-sm-10">
+                                <div class="input-group input-group-merge">
+                                    <select name="deskripsi" id="deskripsi" class="form-control">
+                                        <option>Pilih Kelas</option>
+                                        @foreach ($ruangan as $item)
+                                        <option value="{{ $item -> id }}"> {{ $item -> nama_ruangan }} </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                @error('status_user')
+                                    <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                        <i class="bx bx-error-circle"></i>
+                                        <p>{{ $message }}</p>
+                                    </div>
+                                @enderror
+                            </div>
+                    </div>
+
+                    <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Jumlah</label>
                         <div class="col-sm-10">
                             <div class="input-group input-group-merge">

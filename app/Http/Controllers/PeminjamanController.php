@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Models\Peminjamans;
 use App\Models\Barangs;
+use App\Models\BarangRuangans;
+use App\Models\Ruangans;
 use App\Exports\PeminjamanExport;
 use App\Models\Pengembalians;
 
@@ -125,11 +127,13 @@ class PeminjamanController extends Controller
         $user = Auth::user();
         if ($user->status_user === 'admin') {
             $barang = Barangs::all(); 
+            $ruangan = Ruangans::all(); 
         } else {
             $barang = Barangs::where('status_barang', $user->status_user)->get();
+            $ruangan = Ruangans::where('deskripsi', $user->status_user)->get();
         }
 
-        return view('peminjaman.create', compact('barang'));
+        return view('peminjaman.create', compact('barang', 'ruangan'));
     }
 
     /**
@@ -158,6 +162,23 @@ class PeminjamanController extends Controller
 
         $peminjaman = new Peminjamans;
 
+        if ($request->deskripsi) {
+            $barangRuangan = BarangRuangans::where('barang_id', $request->id_barang)
+                ->where('ruangan_id', $request->deskripsi)
+                ->first();
+
+            if ($barangRuangan) {
+                if ($barangRuangan->stok < $request->jumlah) {
+                    return back()->with('error', 'Jumlah melebihi stok tersedia di ruangan.');
+                }
+
+                $barangRuangan->stok -= $request->jumlah;
+                $barangRuangan->save();
+            } else {
+                return back()->with('error', 'Barang tidak tersedia di ruangan ini.');
+            }
+        }
+
         $lastRecord = Peminjamans::latest('id')->first();
         $lastId = $lastRecord ? $lastRecord->id : 0;
         $kodeBarang = 'BP-' . str_pad($lastId + 1, 4, '0', STR_PAD_LEFT);
@@ -170,6 +191,7 @@ class PeminjamanController extends Controller
         $peminjaman->nama_peminjam = $request->nama_peminjam;
         $peminjaman->id_barang = $request->id_barang;
         $peminjaman->status = "Sedang Dipinjam";
+        $peminjaman->ruangan_id = $request->deskripsi;
 
         $barang = Barangs::findOrFail($request->id_barang);
         if ($barang->stok < $request->jumlah) {
@@ -207,17 +229,19 @@ class PeminjamanController extends Controller
     public function edit($id)
     {
         $user = Auth::user();
+        $peminjaman = Peminjamans::findOrFail($id);
+    
         if ($user->status_user === 'admin') {
-            $peminjaman = Peminjamans::findOrFail($id);
-            $barang = Barangs::all(); 
+            $barang = Barangs::all();
+            $ruangan = Ruangans::all();
         } else {
-            $peminjaman = Peminjamans::findOrFail($id);
             $barang = Barangs::where('status_barang', $user->status_user)->get();
+            $ruangan = Ruangans::where('status_ruangan', $user->status_user)->get(); // Sesuaikan kolom filter jika ada
         }
-
-        return view('peminjaman.edit', compact('peminjaman', 'barang'));
+    
+        return view('peminjaman.edit', compact('peminjaman', 'barang', 'ruangan'));
     }
-
+    
 
     /**
      * Update the specified resource in storage.
@@ -234,28 +258,46 @@ class PeminjamanController extends Controller
             'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
             'nama_peminjam' => 'required|string|max:255',
             'id_barang' => 'required|exists:barangs,id',
-        ],
-        [
+            'ruangan_id' => 'required|exists:ruangans,id',
+            'status' => 'required|in:Sedang Dipinjam,Sudah Dikembalikan'
+        ], [
             'jumlah.required' => 'Jumlah tidak boleh kosong',
             'tanggal_pinjam.required' => 'Tanggal pinjam tidak boleh kosong',
             'tanggal_kembali.required' => 'Tanggal kembali tidak boleh kosong',
             'tanggal_kembali.after_or_equal' => 'Tanggal kembali harus setelah atau sama dengan tanggal pinjam',
             'nama_peminjam.required' => 'Nama peminjam tidak boleh kosong',
             'id_barang.required' => 'Barang harus dipilih',
-            'id_barang.exists' => 'Barang tidak ditemukan',]);
+            'id_barang.exists' => 'Barang tidak ditemukan',
+            'ruangan_id.required' => 'Ruangan harus dipilih',
+            'ruangan_id.exists' => 'Ruangan tidak ditemukan',
+            'status.in' => 'Status tidak valid',
+        ]);
 
         $peminjaman = Peminjamans::findOrFail($id);
 
         $barangLama = Barangs::findOrFail($peminjaman->id_barang);
         $barangBaru = Barangs::findOrFail($request->id_barang);
 
-        // Jika status menjadi "Sudah Dikembalikan"
+        $barangRuanganLama = BarangRuangans::where('barang_id', $peminjaman->id_barang)
+            ->where('ruangan_id', $peminjaman->ruangan_id)
+            ->first();
+
+        $barangRuanganBaru = BarangRuangans::where('barang_id', $request->id_barang)
+            ->where('ruangan_id', $request->ruangan_id)
+            ->first();
+
+        // === Jika status menjadi "Sudah Dikembalikan" ===
         if ($request->status == "Sudah Dikembalikan") {
-            // Tambahkan stok barang lama
+            // Kembalikan stok
             $barangLama->stok += $peminjaman->jumlah;
             $barangLama->save();
 
-            // Buat record di tabel pengembalian
+            if ($barangRuanganLama) {
+                $barangRuanganLama->stok += $peminjaman->jumlah;
+                $barangRuanganLama->save();
+            }
+
+            // Catat ke pengembalian
             $lastRecord = Pengembalians::latest('id')->first();
             $lastId = $lastRecord ? $lastRecord->id : 0;
             $kodeBarang = 'BB-' . str_pad($lastId + 1, 4, '0', STR_PAD_LEFT);
@@ -268,9 +310,9 @@ class PeminjamanController extends Controller
             $pengembalian->status = $request->status;
             $pengembalian->id_peminjam = $peminjaman->id;
             $pengembalian->id_barang = $peminjaman->id_barang;
+            $pengembalian->ruangan_id = $request->ruangan_id; // Diperbaiki dari 'deskripsi'
             $pengembalian->save();
 
-            // Update status peminjaman menjadi "Sudah Dikembalikan"
             $peminjaman->status = 'Sudah Dikembalikan';
             $peminjaman->save();
 
@@ -278,30 +320,63 @@ class PeminjamanController extends Controller
             return redirect()->route('peminjaman.index');
         }
 
-        // Jika status masih "Sedang Dipinjam"
+        // === Jika status masih "Sedang Dipinjam" ===
         if ($request->status == "Sedang Dipinjam") {
             $jumlahBaru = $request->jumlah;
 
+            // Validasi stok
             if ($barangBaru->stok < $jumlahBaru) {
-                Alert::warning('Warning', 'Stok Tidak Cukup')->autoClose(1500);
-                return redirect()->route('peminjaman.index');
+                Alert::warning('Warning', 'Stok barang utama tidak cukup')->autoClose(1500);
+                return redirect()->back();
             }
 
-            if ($peminjaman->id_barang != $request->id_barang) {
-                // Barang dipinjam berubah
+            if (!$barangRuanganBaru || $barangRuanganBaru->stok < $jumlahBaru) {
+                Alert::warning('Warning', 'Stok barang di ruangan tidak cukup')->autoClose(1500);
+                return redirect()->back();
+            }
+
+            // Barang/ruangan berubah
+            if ($peminjaman->id_barang != $request->id_barang || $peminjaman->ruangan_id != $request->ruangan_id) {
                 $barangLama->stok += $peminjaman->jumlah;
                 $barangLama->save();
+
+                if ($barangRuanganLama) {
+                    $barangRuanganLama->stok += $peminjaman->jumlah;
+                    $barangRuanganLama->save();
+                }
 
                 $barangBaru->stok -= $jumlahBaru;
                 $barangBaru->save();
+
+                $barangRuanganBaru->stok -= $jumlahBaru;
+                $barangRuanganBaru->save();
             } else {
-                // Barang sama, update stok
-                $barangLama->stok += $peminjaman->jumlah;
-                $barangLama->stok -= $jumlahBaru;
-                $barangLama->save();
+                // Barang & ruangan sama
+                $selisih = $jumlahBaru - $peminjaman->jumlah;
+
+                if ($selisih != 0) {
+                    if ($selisih > 0) {
+                        if ($barangBaru->stok < $selisih || $barangRuanganBaru->stok < $selisih) {
+                            Alert::warning('Warning', 'Stok tambahan tidak mencukupi')->autoClose(1500);
+                            return redirect()->back();
+                        }
+
+                        $barangBaru->stok -= $selisih;
+                        $barangBaru->save();
+
+                        $barangRuanganBaru->stok -= $selisih;
+                        $barangRuanganBaru->save();
+                    } else {
+                        $barangBaru->stok += abs($selisih);
+                        $barangBaru->save();
+
+                        $barangRuanganBaru->stok += abs($selisih);
+                        $barangRuanganBaru->save();
+                    }
+                }
             }
 
-            // Update data peminjaman
+            // Simpan perubahan
             $peminjaman->update([
                 'id_barang' => $request->id_barang,
                 'jumlah' => $request->jumlah,
@@ -309,16 +384,15 @@ class PeminjamanController extends Controller
                 'tanggal_kembali' => $request->tanggal_kembali,
                 'status' => $request->status,
                 'nama_peminjam' => $request->nama_peminjam,
+                'ruangan_id' => $request->ruangan_id, // Diperbaiki dari 'deskripsi'
             ]);
 
             Alert::success('Success', 'Data Berhasil Diubah')->autoClose(1500);
             return redirect()->route('peminjaman.index');
         }
-
-        // Jika status tidak valid
-        Alert::error('Error', 'Status tidak valid')->autoClose(1500);
-        return redirect()->route('peminjaman.index');
     }
+
+
 
     
     /**

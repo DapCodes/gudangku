@@ -86,22 +86,22 @@
                     </tr>
                 </thead>
                 <tbody class="table-border-bottom-0">
-                    @foreach ($barang as $barang)
+                    @foreach ($barang as $data)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $barang->kode_barang }}</td>
-                            <td>{{ $barang->nama }}</td>
-                            <td>{{ $barang->merek }}</td>
+                            <td>{{ $data->kode_barang }}</td>
+                            <td>{{ $data->nama }}</td>
+                            <td>{{ $data->merek }}</td>
                             <td>
-                                <a href="../image/barang/{{ $barang->foto }}" target="_blank">
+                                <a href="../image/barang/{{ $data->foto }}" target="_blank">
                                     <img style="width: 50px; border-radius: 5px; box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.1);
                                     "
-                                        src="{{ asset('/image/barang/' . $barang->foto) }}" alt="">
+                                        src="{{ asset('/image/barang/' . $data->foto) }}" alt="">
                                 </a>
                             </td>
-                            <td>{{ $barang->stok }}</td>
+                            <td>{{ $data->stok }}</td>
                             @if ($status == 'admin')
-                                <td>{{ $barang->status_barang }}</td>
+                                <td>{{ $data->status_barang }}</td>
                             @endif
                             <td style="overflow: visible;">
                                 <div class="dropdown">
@@ -111,17 +111,17 @@
                                     </button>
                                     <div class="dropdown-menu">
                                         <!-- Tombol Show -->
-                                        <a class="dropdown-item" href="{{ route('barang.show', $barang->id) }}">
+                                        <a class="dropdown-item" href="{{ route('barang.show', $data->id) }}">
                                             <i class="bx bx-show me-1"></i> Lihat
                                         </a>
                                         <!-- Tombol Edit -->
-                                        <a class="dropdown-item" href="{{ route('barang.edit', $barang->id) }}">
+                                        <a class="dropdown-item" href="{{ route('barang.edit', $data->id) }}">
                                             <i class="bx bx-edit-alt me-1"></i> Edit
                                         </a>
 
                                         <!-- Form Delete (Disembunyikan) -->
-                                        <form id="form-delete-{{ $barang->id }}"
-                                            action="{{ route('barang.destroy', $barang->id) }}" method="POST"
+                                        <form id="form-delete-{{ $data->id }}"
+                                            action="{{ route('barang.destroy', $data->id) }}" method="POST"
                                             style="display: none;">
                                             @csrf
                                             @method('DELETE')
@@ -129,7 +129,7 @@
 
                                         <!-- Tombol Hapus (trigger SweetAlert) -->
                                         <a href="#" class="dropdown-item text-danger"
-                                            onclick="confirmDelete({{ $barang->id }})">
+                                            onclick="confirmDelete({{ $data->id }})">
                                             <i class="bx bx-trash me-1"></i> Hapus
                                         </a>
                                     </div>
@@ -139,6 +139,10 @@
                     @endforeach
                 </tbody>
             </table>
+
+            <div class="m-4">
+            {{ $barang->links('vendor.pagination.bootstrap-5') }}
+            </div>
         </div>
     </div>
 

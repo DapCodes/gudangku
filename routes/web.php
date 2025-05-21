@@ -9,6 +9,8 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\BarangKeluarController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PengembalianController;
+use App\Http\Controllers\RuangansController;
+use App\Http\Controllers\BarangRuangansController;
 use App\Http\Controllers\HomeController;
 
 // Middleware
@@ -74,4 +76,10 @@ Route::prefix('admin')->middleware('auth', RoleMiddleware::class)->group(functio
     Route::resource('pengembalian', PengembalianController::class);
     Route::get('pengembalian-export', [PengembalianController::class, 'export'])->name('pengembalian.export');
     Route::get('admin/pengembalian-export-excel', [PengembalianController::class, 'exportExcel'])->name('pengembalian.export.excel');
+
+    // Ruangan Routes
+    Route::resource('ruangan', RuangansController::class);
+
+    // Ruangan Routes
+    Route::resource('brg-ruangan', BarangRuangansController::class);
 });

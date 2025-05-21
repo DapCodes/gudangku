@@ -15,9 +15,15 @@ class BarangKeluars extends Model
         'tanggal_keluar',
         'keterangan',
         'id_barang',
+        'ruangan_id',
     ];
 
     public $timestamps = true;
+
+    public function ruangan()
+    {
+        return $this->belongsTo(Ruangans::class, 'ruangan_id');
+    }
 
 
     public function barang() {
