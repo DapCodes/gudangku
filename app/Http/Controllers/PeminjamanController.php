@@ -243,7 +243,7 @@ class PeminjamanController extends Controller
             $ruangan = Ruangans::all();
         } else {
             $barang = Barangs::where('status_barang', $user->status_user)->get();
-            $ruangan = Ruangans::where('status_ruangan', $user->status_user)->get(); // Sesuaikan kolom filter jika ada
+            $ruangan = Ruangans::where('deskripsi', $user->status_user)->get(); // Sesuaikan kolom filter jika ada
         }
     
         return view('peminjaman.edit', compact('peminjaman', 'barang', 'ruangan'));
@@ -413,14 +413,37 @@ class PeminjamanController extends Controller
         $peminjaman = Peminjamans::findOrFail($id);
         $barang = Barangs::findOrFail($peminjaman->id_barang);
 
+        // Tidak bisa menghapus jika masih dalam status "Sedang Dipinjam"
         if ($peminjaman->status == "Sedang Dipinjam") {
             Alert::warning('Warning', 'Data Tidak Bisa Dihapus')->autoClose(2500);
             return redirect()->route('peminjaman.index');
         }
+
+        // Kembalikan stok ke barangs (gudang utama)
+        $barang->stok += $peminjaman->jumlah;
+        $barang->save();
+
+        // Kembalikan stok ke barang_ruangans
+        $barangRuangan = BarangRuangans::where('barang_id', $peminjaman->id_barang)
+                        ->where('ruangan_id', $peminjaman->ruangan_id)
+                        ->first();
+
+        if ($barangRuangan) {
+            $barangRuangan->stok += $peminjaman->jumlah;
+            $barangRuangan->save();
+        } else {
+            BarangRuangans::create([
+                'barang_id' => $peminjaman->id_barang,
+                'ruangan_id' => $peminjaman->ruangan_id,
+                'stok' => $peminjaman->jumlah,
+            ]);
+        }
+
         // Hapus data peminjaman
         $peminjaman->delete();
 
         Alert::success('Success', 'Data Berhasil Dihapus')->autoClose(2500);
         return redirect()->route('pengembalian.index');
     }
+
 }

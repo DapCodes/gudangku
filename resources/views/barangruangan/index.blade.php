@@ -71,20 +71,12 @@
                                         <i class="bx bx-dots-vertical-rounded"></i>
                                     </button>
                                     <div class="dropdown-menu">
-                                      
-                                        <!-- Form Delete (Disembunyikan) -->
-                                        <form id="form-delete-{{ $item->id }}"
-                                            action="{{ route('peminjaman.destroy', $item->id) }}" method="POST"
-                                            style="display: none;">
-                                            @csrf
-                                            @method('DELETE')
-                                        </form>
-
-                                        <!-- Tombol Hapus (trigger SweetAlert) -->
-                                        <a href="#" class="dropdown-item text-danger"
-                                            onclick="confirmDelete({{ $item->id }})">
-                                            <i class="bx bx-trash me-1"></i> Hapus
+                                       <!-- Tombol Show -->
+                                        <a class="dropdown-item"
+                                            href="{{ route('brg-masuk.show', $item->id, $item->id_barang) }}">
+                                            <i class="bx bx-show me-1"></i> Lihat
                                         </a>
+                                        
                                     </div>
                                 </div>
 

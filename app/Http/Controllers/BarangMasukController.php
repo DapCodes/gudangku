@@ -304,19 +304,29 @@ class BarangMasukController extends Controller
     {
         $barangMasuk = BarangMasuks::findOrFail($id);
         $barangLama = Barangs::findOrFail($barangMasuk->id_barang);
-    
-        // Hitung stok awal sebelum barang masuk
-        $stokSebelumMasuk = $barangLama->stok - $barangMasuk->jumlah;
-    
-        // Cek apakah stok barang masih valid
-        if ($barangLama->stok < $barangMasuk->jumlah) {
-            $barangLama->stok = 0;
-            $barangLama->save();
-        } else {
-            // Update stok barang
-            $barangLama->stok -= $barangMasuk->jumlah;
-            $barangLama->save();
+
+        // Update stok utama di tabel barangs
+        $barangLama->stok = max(0, $barangLama->stok - $barangMasuk->jumlah);
+        $barangLama->save();
+
+        // Update stok di barang_ruangans (berdasarkan barang_id dan ruangan_id)
+        $barangRuangan = BarangRuangans::where('barang_id', $barangMasuk->id_barang)
+                        ->where('ruangan_id', $barangMasuk->ruangan_id)
+                        ->first();
+
+        if ($barangRuangan) {
+            if ($barangRuangan->stok <= $barangMasuk->jumlah) {
+                // Hapus entri jika stok akan jadi 0 atau kurang
+                $barangRuangan->delete();
+            } else {
+                // Kurangi stok
+                $barangRuangan->stok -= $barangMasuk->jumlah;
+                $barangRuangan->save();
+            }
         }
+
+        // Hapus file gambar jika ada
+        $barangMasuk->deleteImage();
 
         // Hapus data barang masuk
         $barangMasuk->delete();

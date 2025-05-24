@@ -19,7 +19,7 @@ class HomeController extends Controller
     public function index()
     {
         $barang = Barangs::count();
-        $peminjaman = Peminjamans::count();
+        $peminjaman = Peminjamans::where('status', 'Sudah Dikembalikan')->count();
         $pengembalian = Pengembalians::count();
         $karyawan = User::where('is_admin', 0)->count();
         $barangMasuk = BarangMasuks::count();

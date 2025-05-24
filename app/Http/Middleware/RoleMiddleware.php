@@ -19,7 +19,9 @@ class RoleMiddleware
     {
         if($request->routeIs('karyawan.*') && Auth::user()->is_admin !== 1){
             abort(403, 'Unauthorized action.');
-        } 
+        } elseif ($request->routeIs('ruangan.*') && Auth::user()->is_admin !== 1) {
+            abort(403, 'Unauthorized action.');
+        }
         
         return $next($request);
     }

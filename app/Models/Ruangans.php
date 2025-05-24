@@ -19,7 +19,7 @@ class Ruangans extends Model
 
     public function barangruangan()
     {
-        return $this->hasMany(BarangRuangans::class);
+        return $this->hasMany(BarangRuangans::class, 'ruangan_id');
     }
 
 }

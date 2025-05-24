@@ -304,12 +304,33 @@ class BarangKeluarController extends Controller
         $barangKeluar = BarangKeluars::findOrFail($id);
         $barang = Barangs::findOrFail($barangKeluar->id_barang);
 
-        // Update stok barang
+        // 1. Kembalikan stok ke gudang
         $barang->stok += $barangKeluar->jumlah;
         $barang->save();
 
+        // 2. Kembalikan stok ke ruangan
+        $barangRuangan = BarangRuangans::where('barang_id', $barangKeluar->id_barang)
+                        ->where('ruangan_id', $barangKeluar->ruangan_id)
+                        ->first();
+
+        if ($barangRuangan) {
+            // Tambah stok ke yang sudah ada
+            $barangRuangan->stok += $barangKeluar->jumlah;
+            $barangRuangan->save();
+        } else {
+            // Buat data baru jika belum ada
+            BarangRuangans::create([
+                'barang_id'   => $barangKeluar->id_barang,
+                'ruangan_id'  => $barangKeluar->ruangan_id,
+                'stok'        => $barangKeluar->jumlah,
+            ]);
+        }
+
+        // 3. Hapus data barang keluar
         $barangKeluar->delete();
-        Alert::success('Berhasil!', 'Data Berhasil Dihapus');
+
+        Alert::success('Berhasil!', 'Data berhasil dihapus')->autoClose(1500);
         return redirect()->route('brg-keluar.index');
     }
+
 }
