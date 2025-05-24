@@ -4,21 +4,16 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-
-
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class UserTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
-        User::Create(
+        $users = [
             [
                 'name' => 'Admin',
                 'email' => 'admin@example.com',
@@ -53,7 +48,11 @@ class UserTableSeeder extends Seeder
                 'password' => Hash::make('12345678'),
                 'status_user' => 'Umum',
                 'is_admin' => 0,
-            ]
-        );
+            ],
+        ];
+
+        foreach ($users as $user) {
+            User::create($user);
+        }
     }
 }
