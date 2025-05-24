@@ -25,6 +25,34 @@ class UserTableSeeder extends Seeder
                 'password' => Hash::make('admin123'),
                 'status_user' => 'admin',
                 'is_admin' => 1,
+            ],
+            [
+                'name' => 'Daffa Ramadhan',
+                'email' => 'daffa@gmail.com',
+                'password' => Hash::make('12345678'),
+                'status_user' => 'RPL',
+                'is_admin' => 0,
+            ],
+            [
+                'name' => 'Faza MT',
+                'email' => 'faza@gmail.com',
+                'password' => Hash::make('12345678'),
+                'status_user' => 'TBSM',
+                'is_admin' => 0,
+            ],
+            [
+                'name' => 'Dhea Febrianti',
+                'email' => 'dhea@gmail.com',
+                'password' => Hash::make('12345678'),
+                'status_user' => 'TKRO',
+                'is_admin' => 0,
+            ],
+            [
+                'name' => 'Rio Oktora',
+                'email' => 'rio@gmail.com',
+                'password' => Hash::make('12345678'),
+                'status_user' => 'Umum',
+                'is_admin' => 0,
             ]
         );
     }
