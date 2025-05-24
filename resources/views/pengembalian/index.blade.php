@@ -56,6 +56,7 @@
                         <th>Tanggal Pinjam</th>
                         <th>Tanggal Kembali</th>
                         <th>Nama Peminjam</th>
+                        <th>Ruangan</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
@@ -71,6 +72,7 @@
                             <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->translatedFormat('l, d F Y') }}</td>
                             <td>{{ \Carbon\Carbon::parse($item->tanggal_kembali)->translatedFormat('l, d F Y') }}</td>
                             <td>{{ $item->nama_peminjam }}</td>
+                            <td>{{ $item->ruangan->nama_ruangan }}</td>
                             <td
                                 class="{{ $item->status == 'Sedang Dipinjam' ? 'text-danger' : ($item->status == 'Sudah Dikembalikan' ? 'text-success' : '') }}">
                                 {{ $item->status }}
@@ -107,6 +109,9 @@
                     @endforeach
                 </tbody>
             </table>
+            <div class="m-4">
+                {{ $pengembalian->links('vendor.pagination.bootstrap-5') }}
+            </div>
         </div>
     </div>
 

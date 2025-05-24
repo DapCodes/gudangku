@@ -37,6 +37,9 @@ class BarangMasukController extends Controller
                 $query->whereHas('barang', function ($q) use ($keyword) {
                     $q->where('nama', 'like', "%$keyword%")
                     ->orWhere('merek', 'like', "%$keyword%");
+                })
+                ->orWhereHas('ruangan', function ($q) use ($keyword) {
+                    $q->where('nama_ruangan', 'like', "%$keyword%");
                 });
             })
             ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
@@ -67,7 +70,7 @@ class BarangMasukController extends Controller
         }
 
         // Jika tidak export, tampilkan dengan paginate
-        $barangMasuk = $query->paginate(100)->withQueryString();
+        $barangMasuk = $query->paginate(10)->withQueryString();
 
         return view('barangmasuk.index', compact('barangMasuk', 'keyword', 'startDate', 'endDate'));
     }

@@ -6,7 +6,7 @@
     <div class="card">
         <div class="px-3 py-3 d-flex justify-content-between">
             <div>
-                <form action="{{ route('peminjaman.index') }}" method="GET" class="d-flex justify-content-between gap-1">
+                <form action="{{ route('ruangan.index') }}" method="GET" class="d-flex justify-content-between gap-1">
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahRuangan">
                         <i class="bx bx-folder-plus" style="position: relative; bottom: 2px;"></i>
                         Tambah
@@ -32,7 +32,7 @@
                 <button class="btn btn-primary" type="submit">Cari</button>
 
                 @if ((request()->has('search') && request()->search != '') || request()->has('start_date') || request()->has('end_date'))
-                    <a href="{{ route('peminjaman.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('ruangan.index') }}" class="btn btn-secondary">
                         <i class="bx bx-refresh"></i>
                     </a>
                 @endif

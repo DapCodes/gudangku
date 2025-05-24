@@ -113,6 +113,9 @@
                     @endforeach
                 </tbody>
             </table>
+            <div class="m-4">
+                {{ $barangMasuk->links('vendor.pagination.bootstrap-5') }}
+            </div>
         </div>
     </div>
 

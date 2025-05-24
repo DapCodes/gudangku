@@ -42,6 +42,9 @@ class PengembalianController extends Controller
                 $query->whereHas('barang', function ($q) use ($keyword) {
                     $q->where('nama', 'like', "%$keyword%")
                       ->orWhere('merek', 'like', "%$keyword%");
+                })
+                ->orWhereHas('ruangan', function ($q) use ($keyword) {
+                    $q->where('nama_ruangan', 'like', "%$keyword%");
                 });
             })
             ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {

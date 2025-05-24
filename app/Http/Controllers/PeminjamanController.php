@@ -43,28 +43,34 @@ class PeminjamanController extends Controller
         $endDate = $request->input('end_date');
         $exportType = $request->input('export');
 
-        $query = Peminjamans::with('barang')
-            ->where('status', 'Sedang Dipinjam')
-            ->when($keyword, function ($query) use ($keyword) {
-                $query->whereHas('barang', function ($q) use ($keyword) {
-                    $q->where('nama', 'like', "%$keyword%")
-                        ->orWhere('merek', 'like', "%$keyword%");
-                });
-            })
-            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('tanggal_pinjam', [$startDate, $endDate]);
-            })
-            ->when($startDate && !$endDate, function ($query) use ($startDate) {
-                $query->whereDate('tanggal_pinjam', '>=', $startDate);
-            })
-            ->when(!$startDate && $endDate, function ($query) use ($endDate) {
-                $query->whereDate('tanggal_pinjam', '<=', $endDate);
-            })
-            ->when($user->status_user !== 'admin', function ($query) use ($user) {
-                $query->whereHas('barang', function ($q) use ($user) {
-                    $q->where('status_barang', $user->status_user);
+        $query = Peminjamans::with(['barang', 'ruangan'])
+        ->where('status', 'Sedang Dipinjam')
+        ->when($keyword, function ($query) use ($keyword) {
+            $query->where(function ($q) use ($keyword) {
+                $q->whereHas('barang', function ($q2) use ($keyword) {
+                    $q2->where('nama', 'like', "%$keyword%")
+                       ->orWhere('merek', 'like', "%$keyword%");
+                })
+                ->orWhereHas('ruangan', function ($q2) use ($keyword) {
+                    $q2->where('nama_ruangan', 'like', "%$keyword%");
                 });
             });
+        })
+        ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+            $query->whereBetween('tanggal_pinjam', [$startDate, $endDate]);
+        })
+        ->when($startDate && !$endDate, function ($query) use ($startDate) {
+            $query->whereDate('tanggal_pinjam', '>=', $startDate);
+        })
+        ->when(!$startDate && $endDate, function ($query) use ($endDate) {
+            $query->whereDate('tanggal_pinjam', '<=', $endDate);
+        })
+        ->when($user->status_user !== 'admin', function ($query) use ($user) {
+            $query->whereHas('barang', function ($q) use ($user) {
+                $q->where('status_barang', $user->status_user);
+            });
+        });
+    
 
         // Mengecek jika ada permintaan untuk export
         if ($exportType) {
@@ -175,7 +181,8 @@ class PeminjamanController extends Controller
                 $barangRuangan->stok -= $request->jumlah;
                 $barangRuangan->save();
             } else {
-                return back()->with('error', 'Barang tidak tersedia di ruangan ini.');
+                Alert::error('Gagal!', 'Barang tidak tersedia di ruangan ini.');
+                return back();
             }
         }
 

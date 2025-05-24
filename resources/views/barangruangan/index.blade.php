@@ -6,7 +6,7 @@
     <div class="card">
         <div class="px-3 py-3 d-flex justify-content-between">
             <div>
-                <form action="{{ route('peminjaman.index') }}" method="GET" class="d-flex justify-content-between gap-1">
+                <form action="{{ route('brg-ruangan.index') }}" method="GET" class="d-flex justify-content-between gap-1">
     
                     <button type="submit" name="export" class="btn btn-danger" value="pdf">
                         <i class="bx bxs-file-pdf" style="position: relative; bottom: 2px;"></i>
@@ -21,13 +21,14 @@
 
             </div>
 
-            <div>
-                <select name="byClass" class="form-select w-20" id="">
-                    @foreach($ruangan as $item)
-                        <option value="">{{ $item->nama_ruangan }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <select name="byClass" id="byClassSelect" class="form-select w-auto" aria-label="Filter Ruangan">
+                <option value="">Semua Ruangan</option>
+                @foreach($ruangan as $item)
+                    <option value="{{ $item->id }}" {{ (isset($byClass) && $byClass == $item->id) ? 'selected' : '' }}>
+                        {{ $item->nama_ruangan }}
+                    </option>
+                @endforeach
+            </select>
             <div class="d-flex align-items-center border-start ps-3 gap-1">
                 <i class="bx bx-search fs-4 lh-0 me-2"></i>
 
@@ -38,7 +39,7 @@
                 <button class="btn btn-primary" type="submit">Cari</button>
 
                 @if ((request()->has('search') && request()->search != '') || request()->has('start_date') || request()->has('end_date'))
-                    <a href="{{ route('peminjaman.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('brg-ruangan.index') }}" class="btn btn-secondary">
                         <i class="bx bx-refresh"></i>
                     </a>
                 @endif
@@ -91,6 +92,9 @@
                     @endforeach
                 </tbody>
             </table>
+            <div class="m-4">
+                {{ $barangRuangan->links('vendor.pagination.bootstrap-5') }}
+            </div>
         </div>
     </div>
 

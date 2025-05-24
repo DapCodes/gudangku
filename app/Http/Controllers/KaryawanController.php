@@ -48,6 +48,8 @@ class KaryawanController extends Controller
             return $pdf->download('laporan-data-karyawan.pdf');
         }
 
+        $users = $karyawanQuery->paginate(10)->withQueryString();
+
         // Menampilkan halaman daftar karyawan dengan data yang sudah difilter
         return view('karyawan.index', compact('users', 'keyword'));
     }

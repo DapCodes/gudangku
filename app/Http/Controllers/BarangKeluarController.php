@@ -29,27 +29,30 @@ class BarangKeluarController extends Controller
         $endDate = $request->input('end_date');
         $exportType = $request->input('export');
 
-        $query = BarangKeluars::with('barang')
-            ->when($keyword, function ($query) use ($keyword) {
-                $query->whereHas('barang', function ($q) use ($keyword) {
-                    $q->where('nama', 'like', "%$keyword%")
-                    ->orWhere('merek', 'like', "%$keyword%");
-                });
+        $query = BarangKeluars::with(['barang', 'ruangan'])
+        ->when($keyword, function ($query) use ($keyword) {
+            $query->whereHas('barang', function ($q) use ($keyword) {
+                $q->where('nama', 'like', "%$keyword%")
+                  ->orWhere('merek', 'like', "%$keyword%");
             })
-            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('tanggal_keluar', [$startDate, $endDate]);
-            })
-            ->when($startDate && !$endDate, function ($query) use ($startDate) {
-                $query->whereDate('tanggal_keluar', '>=', $startDate);
-            })
-            ->when(!$startDate && $endDate, function ($query) use ($endDate) {
-                $query->whereDate('tanggal_keluar', '<=', $endDate);
-            })
-            ->when($user->status_user !== 'admin', function ($query) use ($user) {
-                $query->whereHas('barang', function ($q) use ($user) {
-                    $q->where('status_barang', $user->status_user);
-                });
+            ->orWhereHas('ruangan', function ($q) use ($keyword) {
+                $q->where('nama_ruangan', 'like', "%$keyword%");
             });
+        })
+        ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+            $query->whereBetween('tanggal_keluar', [$startDate, $endDate]);
+        })
+        ->when($startDate && !$endDate, function ($query) use ($startDate) {
+            $query->whereDate('tanggal_keluar', '>=', $startDate);
+        })
+        ->when(!$startDate && $endDate, function ($query) use ($endDate) {
+            $query->whereDate('tanggal_keluar', '<=', $endDate);
+        })
+        ->when($user->status_user !== 'admin', function ($query) use ($user) {
+            $query->whereHas('barang', function ($q) use ($user) {
+                $q->where('status_barang', $user->status_user);
+            });
+        });
 
         $barangKeluar = $query->get();
 
@@ -65,6 +68,8 @@ class BarangKeluarController extends Controller
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.barangKeluar', ['barangKeluar' => $barangKeluar]);
             return $pdf->download('laporan-data-barangkeluar.pdf');
         }
+
+        $barangKeluar = $query->paginate(10)->withQueryString();
 
         return view('barangkeluar.index', compact('barangKeluar', 'keyword', 'startDate', 'endDate'));
     }
@@ -136,7 +141,8 @@ class BarangKeluarController extends Controller
                     $barangRuangan->stok -= $request->jumlah;
                     $barangRuangan->save();
                 } else {
-                    return back()->with('error', 'Barang tidak tersedia di ruangan ini.');
+                    Alert::error('Gagal!', 'Barang tidak tersedia di ruangan ini.');
+                    return back();
                 }
             }
 

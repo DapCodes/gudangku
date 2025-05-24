@@ -58,6 +58,7 @@
                         <th>Merek</th>
                         <th>Jumlah</th>
                         <th>Tanggal Keluar</th>
+                        <th>Ruangan</th>
                         <th>Keterangan</th>
                         <th>Aksi</th>
                     </tr>
@@ -71,6 +72,7 @@
                             <td>{{ $item->barang->merek }}</td>
                             <td>{{ $item->jumlah }}</td>
                             <td>{{ \Carbon\Carbon::parse($item->tanggal_keluar)->translatedFormat('l, d F Y') }}</td>
+                            <td>{{ $item->ruangan->nama_ruangan}}</td>
                             <td>{{ Str::limit($item->keterangan, 20) }}</td>
                             <td style="overflow: visible;">
                                 <div class="dropdown">
@@ -109,6 +111,9 @@
                     @endforeach
                 </tbody>
             </table>
+            <div class="m-4">
+                {{ $barangKeluar->links('vendor.pagination.bootstrap-5') }}
+            </div>
         </div>
     </div>
 

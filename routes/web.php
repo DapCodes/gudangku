@@ -79,7 +79,13 @@ Route::prefix('admin')->middleware('auth', RoleMiddleware::class)->group(functio
 
     // Ruangan Routes
     Route::resource('ruangan', RuangansController::class);
+    Route::get('ruangan-export', [RuangansController::class, 'export'])->name('ruangan.export');
+    Route::get('admin/ruangan-export-excel', [RuangansController::class, 'exportExcel'])->name('ruangan.export.excel');
 
-    // Ruangan Routes
+
+    // Barang Ruangan Routes
     Route::resource('brg-ruangan', BarangRuangansController::class);
+    Route::get('brg-ruangan-export', [BarangRuangansController::class, 'export'])->name('brg-ruangan.export');
+    Route::get('admin/brg-ruangan-export-excel', [BarangRuangansController::class, 'exportExcel'])->name('brg-ruangan.export.excel');
+    
 });
