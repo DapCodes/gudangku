@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Barangs;
 use App\Models\BarangMasuks;
@@ -17,40 +17,46 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class BarangRuangansController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index(Request $request)
     {
+        $user = Auth::user();
         $keyword = $request->input('search');
         $exportType = $request->input('export');
-        $byClass = $request->input('byClass'); 
+        $byClass = $request->input('byClass');
 
+        // Query utama
         $barangRuanganQuery = BarangRuangans::with(['ruangan', 'barang'])
+            ->join('barangs', 'barang_ruangans.barang_id', '=', 'barangs.id')
             ->join('ruangans', 'barang_ruangans.ruangan_id', '=', 'ruangans.id')
-            ->where('barang_ruangans.stok', '>', 0) 
+            ->select('barang_ruangans.*') // Penting agar model tetap dikenali
+            ->where('barang_ruangans.stok', '>', 0)
             ->orderBy('ruangans.nama_ruangan', 'asc');
 
+        // Filter user non-admin berdasarkan status_barang
+        if ($user->status_user !== 'admin') {
+            $barangRuanganQuery->where('barangs.status_barang', $user->status_user);
+        }
+
+        // Filter berdasarkan ruangan
         if ($byClass) {
             $barangRuanganQuery->where('barang_ruangans.ruangan_id', $byClass);
         }
 
+        // Filter pencarian
         if ($keyword) {
             $barangRuanganQuery->where(function ($query) use ($keyword) {
                 $query->whereHas('ruangan', function ($q) use ($keyword) {
                     $q->where('nama_ruangan', 'like', "%$keyword%")
-                    ->orWhere('deskripsi', 'like', "%$keyword%");
+                      ->orWhere('deskripsi', 'like', "%$keyword%");
                 })
                 ->orWhereHas('barang', function ($q) use ($keyword) {
                     $q->where('nama', 'like', "%$keyword%")
-                    ->orWhere('merek', 'like', "%$keyword%");
+                      ->orWhere('merek', 'like', "%$keyword%");
                 });
             });
         }
 
-        // Untuk export
+        // Ekspor Excel / PDF
         if ($exportType) {
             $barangRuangan = $barangRuanganQuery->get();
 
@@ -64,11 +70,16 @@ class BarangRuangansController extends Controller
             }
         }
 
+        // Pagination dan tampilkan ke view
         $barangRuangan = $barangRuanganQuery->paginate(10);
         $ruangan = Ruangans::orderBy('nama_ruangan')->get();
 
         return view('barangruangan.index', compact('barangRuangan', 'ruangan', 'keyword', 'byClass'));
     }
 
-    
+    public function show($id)
+    {
+        $barangRuangan = BarangRuangans::findOrFail($id);
+        return view('barangruangan.show', compact('barangRuangan'));
+    }
 }

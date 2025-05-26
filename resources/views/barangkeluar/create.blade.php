@@ -57,11 +57,11 @@
                     </div>
 
                     <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Pilih Ruanagn</label>
+                            <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Pilih Ruangan</label>
                             <div class="col-sm-10">
                                 <div class="input-group input-group-merge">
                                     <select name="deskripsi" id="deskripsi" class="form-control">
-                                        <option>Pilih Kelas</option>
+                                        <option>Pilih Ruang</option>
                                         @foreach ($ruangan as $item)
                                         <option value="{{ $item -> id }}"> {{ $item -> nama_ruangan }} </option>
                                         @endforeach

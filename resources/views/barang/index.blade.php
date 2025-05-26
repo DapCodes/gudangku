@@ -140,9 +140,9 @@
                 </tbody>
             </table>
 
-            <div class="m-4">
-                {{ $barang->links('vendor.pagination.bootstrap-5') }}
-            </div>
+        </div>
+        <div class="m-4">
+            {{ $barang->links('vendor.pagination.bootstrap-5') }}
         </div>
     </div>
 

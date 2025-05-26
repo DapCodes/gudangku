@@ -73,7 +73,7 @@ class BarangController extends Controller
         }
 
         // Ambil data barang dengan pagination
-        $barang = $barangQuery->orderBy('id', 'asc')->paginate(10);
+        $barang = $barangQuery->orderBy('nama', 'asc')->paginate(10);
 
         return view('barang.index', compact('barang', 'keyword', 'statusFilter'));
     }

@@ -310,7 +310,7 @@
                 },
                 labels: {!! json_encode($chartData['pinjamkembali']) !!},
                 series: {!! json_encode($chartData['pinjamkembaliseries']) !!},
-                colors: [config.colors.success, config.colors.danger],
+                colors: [config.colors.danger, config.colors.success],
                 stroke: {
                     width: 5,
                     colors: cardColor

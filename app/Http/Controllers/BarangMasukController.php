@@ -86,7 +86,7 @@ class BarangMasukController extends Controller
     public function create()
     {
         $user = Auth::user();
-        if ($user->status_user === 'admin') {
+        if ($user->status_user === 'admin' || $user->status_user === 'Umum') {
             $barang = Barangs::all(); 
             $ruangan = Ruangans::all();
         } else {
@@ -190,7 +190,7 @@ class BarangMasukController extends Controller
         $user = Auth::user();
         $barangMasuk = BarangMasuks::findOrFail($id);
 
-        if ($user->status_user === 'admin') {
+        if ($user->status_user === 'admin' || $user->status_user === 'Umum') {
             $barang = Barangs::all();
             $ruangan = Ruangans::all();
         } else {

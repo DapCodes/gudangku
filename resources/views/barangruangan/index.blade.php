@@ -21,7 +21,7 @@
 
             </div>
 
-            <select name="byClass" id="byClassSelect" class="form-select w-auto" aria-label="Filter Ruangan">
+            <select name="byClass" id="byClassSelect" class="form-select w-25 text-center" aria-label="Filter Ruangan">
                 <option value="">Semua Ruangan</option>
                 @foreach($ruangan as $item)
                     <option value="{{ $item->id }}" {{ (isset($byClass) && $byClass == $item->id) ? 'selected' : '' }}>
@@ -38,7 +38,7 @@
 
                 <button class="btn btn-primary" type="submit">Cari</button>
 
-                @if ((request()->has('search') && request()->search != '') || request()->has('start_date') || request()->has('end_date'))
+                @if ((request()->has('search') && request()->search != '') || request()->has('start_date') || request()->has('end_date') || request()->has('byClass'))
                     <a href="{{ route('brg-ruangan.index') }}" class="btn btn-secondary">
                         <i class="bx bx-refresh"></i>
                     </a>
@@ -73,7 +73,7 @@
                                     <div class="dropdown-menu">
                                        <!-- Tombol Show -->
                                         <a class="dropdown-item"
-                                            href="{{ route('brg-masuk.show', $item->id, $item->id_barang) }}">
+                                            href="{{ route('brg-ruangan.show', $item->id, $item->id_barang) }}">
                                             <i class="bx bx-show me-1"></i> Lihat
                                         </a>
                                         
@@ -84,9 +84,9 @@
                     @endforeach
                 </tbody>
             </table>
-            <div class="m-4">
-                {{ $barangRuangan->links('vendor.pagination.bootstrap-5') }}
-            </div>
+        </div>
+        <div class="m-4">
+            {{ $barangRuangan->links('vendor.pagination.bootstrap-5') }}
         </div>
     </div>
 
