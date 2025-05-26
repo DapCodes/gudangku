@@ -42,7 +42,7 @@
                         <div class="card-body">
                             <span class="fw-semibold d-block mb-1">
                                 <i class="bx bx-download" style="position: relative; bottom: 2px;"></i>
-                                Jumlah Stock
+                                Jumlah Stok
                             </span>
                             <h2 class="card-title mb-0 text-primary">{{ $barang->stok }}</h3>
                         </div>
