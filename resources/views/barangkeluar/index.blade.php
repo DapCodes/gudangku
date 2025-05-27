@@ -72,7 +72,7 @@
                             <td>{{ $item->barang->merek }}</td>
                             <td>{{ $item->jumlah }}</td>
                             <td>{{ \Carbon\Carbon::parse($item->tanggal_keluar)->translatedFormat('l, d F Y') }}</td>
-                            <td>{{ $item->ruangan->nama_ruangan}}</td>
+                            <td>{{ $item->ruangan->nama_ruangan }}</td>
                             <td>{{ Str::limit($item->keterangan, 20) }}</td>
                             <td style="overflow: visible;">
                                 <div class="dropdown">

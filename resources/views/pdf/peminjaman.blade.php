@@ -80,9 +80,9 @@
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $item->kode_barang }}</td>
-                    <td>{{ $item->barang->nama . " - " . $item->barang->merek }}</td>
-                    <td>{{ $item->barang->kode_barang}}</td>
-                    <td>{{ $item->jumlah}}</td>
+                    <td>{{ $item->barang->nama . ' - ' . $item->barang->merek }}</td>
+                    <td>{{ $item->barang->kode_barang }}</td>
+                    <td>{{ $item->jumlah }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->translatedFormat('l, d F Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->tanggal_kembali)->translatedFormat('l, d F Y') }}</td>
                     <td>{{ $item->nama_peminjam }}</td>

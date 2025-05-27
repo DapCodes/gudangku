@@ -22,7 +22,8 @@
             <div class="card mb-4">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <div>
-                        <h5 class="card-title">{{ $barangRuangan->barang->nama . ' - ' . $barangRuangan->barang->merek }}</h5>
+                        <h5 class="card-title">{{ $barangRuangan->barang->nama . ' - ' . $barangRuangan->barang->merek }}
+                        </h5>
                         <div class="card-subtitle text-muted">
                             {{ $barangRuangan->barang->kode_barang }} <br>
                         </div>

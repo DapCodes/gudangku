@@ -66,11 +66,15 @@ Route::prefix('admin')->middleware('auth', RoleMiddleware::class)->group(functio
     Route::resource('brg-keluar', BarangKeluarController::class);
     Route::get('brg-keluar-export', [BarangKeluarController::class, 'export'])->name('brg-keluar.export');
     Route::get('admin/brg-keluar-export-excel', [BarangKeluarController::class, 'exportExcel'])->name('brg-keluar.export.excel');
+    Route::get('/get-barang-by-ruangan/{ruanganId}', [BarangKeluarController::class, 'getBarangByRuangan']);
+
 
     // Peminjaman Routes
     Route::resource('peminjaman', PeminjamanController::class);
     Route::get('peminjaman-export', [PeminjamanController::class, 'export'])->name('peminjaman.export');
     Route::get('admin/peminjaman-export-excel', [PeminjamanController::class, 'exportExcel'])->name('peminjaman.export.excel');
+    Route::get('/get-barang-by-ruangan/{ruanganId}', [BarangKeluarController::class, 'getBarangByRuangan']);
+
 
     // Pengembalian Routes
     Route::resource('pengembalian', PengembalianController::class);
@@ -81,7 +85,6 @@ Route::prefix('admin')->middleware('auth', RoleMiddleware::class)->group(functio
     Route::resource('ruangan', RuangansController::class);
     Route::get('ruangan-export', [RuangansController::class, 'export'])->name('ruangan.export');
     Route::get('admin/ruangan-export-excel', [RuangansController::class, 'exportExcel'])->name('ruangan.export.excel');
-
 
     // Barang Ruangan Routes
     Route::resource('brg-ruangan', BarangRuangansController::class);

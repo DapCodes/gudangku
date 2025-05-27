@@ -17,67 +17,50 @@
             <div class="card-body">
                 <form action="{{ route('peminjaman.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
+
+                    {{-- Pilih Ruangan --}}
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Pilih Barang</label>
+                        <label class="col-sm-2 col-form-label">Pilih Ruangan</label>
+                        <div class="col-sm-10">
+                            <select name="deskripsi" id="ruanganSelect" class="form-control">
+                                <option value="">Pilih Ruangan</option>
+                                @foreach ($ruangan as $item)
+                                    <option value="{{ $item->id }}">{{ $item->nama_ruangan }}</option>
+                                @endforeach
+                            </select>
+                            @error('deskripsi')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    {{-- Pilih Barang --}}
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Pilih Barang</label>
                         <div class="col-sm-10">
                             <div class="dropdown">
                                 <button style="text-align: left;" class="w-100 btn btn-outline-secondary dropdown-toggle"
                                     type="button" id="dropdownBarang" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i style="position: relative; right: 8px; bottom: 2px;" class="bx bx-box"></i>
-                                    Pilih Barang
+                                    <i class="bx bx-box" style="margin-right: 5px;"></i> Pilih Barang
                                 </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownBarang" style="width: 100%;">
-                                    @foreach ($barang as $item)
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-start" href="#"
-                                                onclick="pilihBarang('{{ $item->id }}', '{{ $item->nama }}', '{{ $item->merek }}')">
-                                                <img src="{{ asset('image/barang/' . $item->foto) }}"
-                                                    alt="{{ $item->nama }}" width="50" height="50"
-                                                    class="me-3 rounded">
-                                                <div class="flex-grow-1">
-                                                    <div><strong>{{ $item->nama }}</strong> - {{ $item->merek }}</div>
-                                                    <small class="text-muted">Stok: {{ $item->stok }}</small>
-                                                </div>
-                                            </a>
-                                            <hr class="my-1">
-                                        </li>
-                                    @endforeach
+                                <ul class="dropdown-menu w-100" id="barangList" aria-labelledby="dropdownBarang">
+                                    <li><span class="dropdown-item">Silakan pilih ruangan terlebih dahulu</span></li>
                                 </ul>
-                                @error('id_barang')
-                                    <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
-                                        <i class="bx bx-error-circle"></i>
-                                        <p>{{ $message }}</p>
-                                    </div>
-                                @enderror
                             </div>
-
-                            <!-- Ini penting -->
                             <input type="hidden" name="id_barang" id="id_barang">
+                            <div id="barangTerpilih" class="mt-2 text-muted"></div>
 
+                            @error('id_barang')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
                     </div>
-
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Pilih Ruangan</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                <select name="deskripsi" id="ruangan_id" class="form-control">
-                                    <option>Pilih Ruang</option>
-                                    @foreach ($ruangan as $item)
-                                        <option value="{{ $item->id }}">
-                                            {{ $item->nama_ruangan }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                </div>
-                                @error('status_user')
-                                    <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
-                                        <i class="bx bx-error-circle"></i>
-                                        <p>{{ $message }}</p>
-                                    </div>
-                                @enderror
-                            </div>
-                        </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Jumlah</label>
@@ -154,5 +137,50 @@
             </div>
         </div>
     </div>
+
+
+    {{-- SCRIPT BARANG DINAMIS --}}
+    <script>
+        document.getElementById('ruanganSelect').addEventListener('change', function() {
+            const ruanganId = this.value;
+            const barangList = document.getElementById('barangList');
+            barangList.innerHTML = '<li><span class="dropdown-item">Memuat data...</span></li>';
+
+            fetch(`{{ url('admin/get-barang-by-ruangan') }}/${ruanganId}`)
+                .then(response => response.json())
+                .then(data => {
+                    barangList.innerHTML = '';
+
+                    if (!data || data.length === 0) {
+                        barangList.innerHTML =
+                            '<li><span class="dropdown-item">Tidak ada barang di ruangan ini</span></li>';
+                        return;
+                    }
+                    data.forEach(item => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                        <a class="dropdown-item d-flex align-items-start" href="#"
+                            onclick="pilihBarang('${item.id}', '${item.nama}', '${item.merek}')">
+                            <div>
+                                <div><strong>${item.nama}</strong> - ${item.merek}</div>
+                                <small class="text-muted">Stok: ${item.stok}</small>
+                            </div>
+                        </a>
+                        <hr class="my-1">
+                    `;
+                        barangList.appendChild(li);
+                    });
+                })
+                .catch(() => {
+                    barangList.innerHTML =
+                        '<li><span class="dropdown-item text-danger">Gagal mengambil data barang</span></li>';
+                });
+        });
+
+        function pilihBarang(id, nama, merek) {
+            document.getElementById('id_barang').value = id;
+            document.getElementById('barangTerpilih').innerText = `Barang dipilih: ${nama} (${merek})`;
+        }
+    </script>
 
 @endsection

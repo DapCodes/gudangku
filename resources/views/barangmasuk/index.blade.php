@@ -75,7 +75,7 @@
                             <td>{{ $item->jumlah }}</td>
                             <td>{{ \Carbon\Carbon::parse($item->tanggal_masuk)->translatedFormat('l, d F Y') }}</td>
                             <td>{{ Str::limit($item->keterangan, 30) }}</td>
-                            <td>{{ $item->ruangan->nama_ruangan}}</td>
+                            <td>{{ $item->ruangan->nama_ruangan }}</td>
                             <td>
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow"

@@ -73,7 +73,7 @@
                     <ul class="p-0 m-0">
                         <li class="d-flex mb-4 pb-1">
                             <div class="avatar flex-shrink-0 me-3">
-                                <img src="../admin/assets/img/gif-icons/pinjam.png" alt="">
+                                <img src="../admin/assets/img/gif-icons/kembali.png" alt="">
                             </div>
                             <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                 <div class="me-2">
@@ -87,7 +87,7 @@
                         </li>
                         <li class="d-flex">
                             <div class="avatar flex-shrink-0 me-3">
-                                <img src="../admin/assets/img/gif-icons/kembali.png" alt="">
+                                <img src="../admin/assets/img/gif-icons/pinjam.png" alt="">
                             </div>
                             <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                 <div class="me-2">
@@ -157,6 +157,27 @@
         </div>
 
     </div>
+
+
+    @if (session('success_login'))
+        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+            <div class="toast show bg-white shadow-lg border-0 rounded-3" role="alert" aria-live="assertive"
+                aria-atomic="true" style="min-width: 260px; max-width: 340px; font-size: 0.875rem;">
+                <div class="toast-header bg-white py-2 px-3 border-bottom">
+                    <img src="{{ asset('admin/assets/img/favicon/gudangku-icon.ico') }}" class="rounded me-2"
+                        alt="Logo" width="18">
+                    <strong class="me-auto text-dark fw-semibold" style="font-size: 0.95rem;">Invas</strong>
+                    <button type="button" class="btn-close btn-close-dark ms-2" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+                <div class="toast-body text-dark px-3 py-3">
+                    {{ session('success_login') }}
+                </div>
+            </div>
+        </div>
+    @endif
+
+
 
 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>

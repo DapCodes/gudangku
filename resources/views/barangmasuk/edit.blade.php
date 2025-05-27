@@ -56,26 +56,27 @@
 
                         </div>
                     </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Ruangan</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Ruangan</label>
+                        <div class="col-sm-10">
+                            <div class="input-group input-group-merge">
                                 <select name="ruangan_id" id="ruangan_id" class="form-control">
                                     @foreach ($ruangan as $item)
-                                        <option value="{{ $item->id }}" {{ $item->id == $barangMasuk->ruangan_id ? 'selected' : '' }}>
+                                        <option value="{{ $item->id }}"
+                                            {{ $item->id == $barangMasuk->ruangan_id ? 'selected' : '' }}>
                                             {{ $item->nama_ruangan }}
                                         </option>
                                     @endforeach
                                 </select>
-                                </div>
-                                @error('status_user')
-                                    <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
-                                        <i class="bx bx-error-circle"></i>
-                                        <p>{{ $message }}</p>
-                                    </div>
-                                @enderror
                             </div>
+                            @error('status_user')
+                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
+                                    <i class="bx bx-error-circle"></i>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
                         </div>
+                    </div>
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Jumlah</label>
                         <div class="col-sm-10">

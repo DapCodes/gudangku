@@ -74,9 +74,9 @@
             @foreach ($barangRuangan as $i => $item)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->barang->nama . " - " . $item->barang->merek }}</td>
+                    <td>{{ $item->barang->nama . ' - ' . $item->barang->merek }}</td>
                     <td>{{ $item->ruangan->nama_ruangan }}</td>
-                    <td>{{ $item->stok}}</td>
+                    <td>{{ $item->stok }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -84,7 +84,7 @@
     <div class="footer">
         Dicetak pada: {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}
     </div>
-    
+
 </body>
 
 </html>

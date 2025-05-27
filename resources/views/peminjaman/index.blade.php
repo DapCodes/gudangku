@@ -83,7 +83,7 @@
                                 {{ $item->status }}
                             </td>
                             <td>
-                                @if($item->tenggat === 'Terlambat')
+                                @if ($item->tenggat === 'Terlambat')
                                     <span class="text-danger">{{ $item->tenggat }}</span>
                                 @else
                                     <span class="text-success">{{ $item->tenggat }}</span>

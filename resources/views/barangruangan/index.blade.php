@@ -7,7 +7,7 @@
         <div class="px-3 py-3 d-flex justify-content-between">
             <div>
                 <form action="{{ route('brg-ruangan.index') }}" method="GET" class="d-flex justify-content-between gap-1">
-    
+
                     <button type="submit" name="export" class="btn btn-danger" value="pdf">
                         <i class="bx bxs-file-pdf" style="position: relative; bottom: 2px;"></i>
                         PDF
@@ -23,8 +23,8 @@
 
             <select name="byClass" id="byClassSelect" class="form-select w-25 text-center" aria-label="Filter Ruangan">
                 <option value="">Semua Ruangan</option>
-                @foreach($ruangan as $item)
-                    <option value="{{ $item->id }}" {{ (isset($byClass) && $byClass == $item->id) ? 'selected' : '' }}>
+                @foreach ($ruangan as $item)
+                    <option value="{{ $item->id }}" {{ isset($byClass) && $byClass == $item->id ? 'selected' : '' }}>
                         {{ $item->nama_ruangan }}
                     </option>
                 @endforeach
@@ -33,12 +33,16 @@
                 <i class="bx bx-search fs-4 lh-0 me-2"></i>
 
 
-                <input type="text" name="search" class="form-control border-0 shadow-none"
-                    placeholder="Cari..." aria-label="Cari..." value="{{ request('search') }}" />
+                <input type="text" name="search" class="form-control border-0 shadow-none" placeholder="Cari..."
+                    aria-label="Cari..." value="{{ request('search') }}" />
 
                 <button class="btn btn-primary" type="submit">Cari</button>
 
-                @if ((request()->has('search') && request()->search != '') || request()->has('start_date') || request()->has('end_date') || request()->has('byClass'))
+                @if (
+                    (request()->has('search') && request()->search != '') ||
+                        request()->has('start_date') ||
+                        request()->has('end_date') ||
+                        request()->has('byClass'))
                     <a href="{{ route('brg-ruangan.index') }}" class="btn btn-secondary">
                         <i class="bx bx-refresh"></i>
                     </a>
@@ -61,9 +65,9 @@
                     @foreach ($barangRuangan as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $item->ruangan->nama_ruangan}}</td>
-                            <td>{{ $item->barang->nama}}</td>
-                            <td>{{ $item->stok}}</td>
+                            <td>{{ $item->ruangan->nama_ruangan }}</td>
+                            <td>{{ $item->barang->nama }}</td>
+                            <td>{{ $item->stok }}</td>
                             <td style="overflow: visible;">
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
@@ -71,12 +75,12 @@
                                         <i class="bx bx-dots-vertical-rounded"></i>
                                     </button>
                                     <div class="dropdown-menu">
-                                       <!-- Tombol Show -->
+                                        <!-- Tombol Show -->
                                         <a class="dropdown-item"
                                             href="{{ route('brg-ruangan.show', $item->id, $item->id_barang) }}">
                                             <i class="bx bx-show me-1"></i> Lihat
                                         </a>
-                                        
+
                                     </div>
                                 </div>
 

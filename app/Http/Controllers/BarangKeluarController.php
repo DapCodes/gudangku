@@ -82,19 +82,26 @@ class BarangKeluarController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
     public function create()
     {
         $user = Auth::user();
-        if ($user->status_user === 'admin' || $user->status_user === 'Umum') {
-            $barang = Barangs::all(); 
-            $ruangan = Ruangans::all();
-        } else {
-            $barang = Barangs::where('status_barang', $user->status_user)->get();
-            $ruangan = Ruangans::where('deskripsi', $user->status_user)->get();
-        }
+        $barang = ($user->status_user === 'admin' || $user->status_user === 'Umum')
+            ? Barangs::all()
+            : Barangs::where('status_barang', $user->status_user)->get();
+
+        // Ambil ID ruangan yang memiliki barang
+        $ruanganIdsWithBarang = BarangRuangans::distinct()->pluck('ruangan_id');
+
+        $ruangan = ($user->status_user === 'admin' || $user->status_user === 'Umum')
+            ? Ruangans::whereIn('id', $ruanganIdsWithBarang)->get()
+            : Ruangans::whereIn('id', $ruanganIdsWithBarang)
+                    ->where('deskripsi', $user->status_user)
+                    ->get();
 
         return view('barangkeluar.create', compact('barang', 'ruangan'));
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -332,5 +339,25 @@ class BarangKeluarController extends Controller
         Alert::success('Berhasil!', 'Data berhasil dihapus')->autoClose(1500);
         return redirect()->route('brg-keluar.index');
     }
+
+
+    public function getBarangByRuangan($ruanganId)
+    {
+        $barang = BarangRuangans::with('barang')
+            ->where('ruangan_id', $ruanganId)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->barang->id,
+                    'nama' => $item->barang->nama,
+                    'merek' => $item->barang->merek,
+                    'foto' => asset('image/barang/' . $item->barang->foto),
+                    'stok' => $item->stok,
+                ];
+            });
+
+        return response()->json($barang);
+    }
+
 
 }

@@ -38,7 +38,7 @@ class Barangs extends Model
     }
     public function barangruangan()
     {
-        return $this->hasMany(BarangRuangan::class);
+        return $this->hasMany(BarangRuangans::class);
     }
 
     public function deleteImage(){

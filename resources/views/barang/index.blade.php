@@ -43,27 +43,27 @@
             </div>
         </div>
         <div class="d-flex align-items-center gap-1 my-2" style="position:relative; left: 17px;">
-        @php
-            $status = Auth::user()->status_user;
+            @php
+                $status = Auth::user()->status_user;
             @endphp
             @if ($status == 'admin')
-        @php
-                $statusList = ['TBSM', 'RPL', 'TKRO', 'UMUM']; // Sesuaikan dengan status yang ada
-                $activeStatus = request()->get('status_barang');
-            @endphp
-            @foreach ($statusList as $s)
-                <a href="{{ route('barang.index', array_merge(request()->query(), ['status_barang' => $s])) }}"
-                    class="btn btn-sm {{ $activeStatus == $s ? 'btn-primary' : 'btn-outline-primary' }}">
-                    {{ strtoupper($s) }}
-                </a>
-            @endforeach
+                @php
+                    $statusList = ['TBSM', 'RPL', 'TKRO', 'UMUM']; // Sesuaikan dengan status yang ada
+                    $activeStatus = request()->get('status_barang');
+                @endphp
+                @foreach ($statusList as $s)
+                    <a href="{{ route('barang.index', array_merge(request()->query(), ['status_barang' => $s])) }}"
+                        class="btn btn-sm {{ $activeStatus == $s ? 'btn-primary' : 'btn-outline-primary' }}">
+                        {{ strtoupper($s) }}
+                    </a>
+                @endforeach
 
-            {{-- Tombol untuk reset filter status --}}
-            @if (request()->has('status_barang'))
-                <a href="{{ route('barang.index', array_merge(request()->except('status_barang'))) }}"
-                    class="btn btn-sm btn-secondary">Reset</a>
+                {{-- Tombol untuk reset filter status --}}
+                @if (request()->has('status_barang'))
+                    <a href="{{ route('barang.index', array_merge(request()->except('status_barang'))) }}"
+                        class="btn btn-sm btn-secondary">Reset</a>
+                @endif
             @endif
-        @endif
         </div>
 
         <div class="table-responsive text-nowrap mb-2">

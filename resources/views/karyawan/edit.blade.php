@@ -69,7 +69,7 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Kata Sandi</label>
+                        <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Kata Sandi Baru</label>
                         <div class="col-sm-10">
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
@@ -104,13 +104,21 @@
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Status Petugas</label>
                         <div class="col-sm-10">
                             <div class="input-group input-group-merge">
-                            <select name="status_user" id="status_user"
-                                class="form-control @error('status_user') is-invalid @enderror">
-                                <option value="Umum" {{ old('status_user', $karyawan->status_user ?? '') == 'Umum' ? 'selected' : '' }}>Petugas Umum</option>
-                                <option value="RPL" {{ old('status_user', $karyawan->status_user ?? '') == 'RPL' ? 'selected' : '' }}>Petugas RPL</option>
-                                <option value="TBSM" {{ old('status_user', $karyawan->status_user ?? '') == 'TBSM' ? 'selected' : '' }}>Petugas TBSM</option>
-                                <option value="TKRO" {{ old('status_user', $karyawan->status_user ?? '') == 'TKRO' ? 'selected' : '' }}>Petugas TKRO</option>
-                            </select>
+                                <select name="status_user" id="status_user"
+                                    class="form-control @error('status_user') is-invalid @enderror">
+                                    <option value="Umum"
+                                        {{ old('status_user', $karyawan->status_user ?? '') == 'Umum' ? 'selected' : '' }}>
+                                        Petugas Umum</option>
+                                    <option value="RPL"
+                                        {{ old('status_user', $karyawan->status_user ?? '') == 'RPL' ? 'selected' : '' }}>
+                                        Petugas RPL</option>
+                                    <option value="TBSM"
+                                        {{ old('status_user', $karyawan->status_user ?? '') == 'TBSM' ? 'selected' : '' }}>
+                                        Petugas TBSM</option>
+                                    <option value="TKRO"
+                                        {{ old('status_user', $karyawan->status_user ?? '') == 'TKRO' ? 'selected' : '' }}>
+                                        Petugas TKRO</option>
+                                </select>
                             </div>
                             @error('status_user')
                                 <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">

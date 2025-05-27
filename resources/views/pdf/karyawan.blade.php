@@ -77,7 +77,7 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $item->name }}</td>
                     <td>{{ $item->email }}</td>
-                    <td>{{ "Petugas " . $item->status_user }}</td>
+                    <td>{{ 'Petugas ' . $item->status_user }}</td>
                     <td>{{ \Carbon\Carbon::parse($item->created_at)->translatedFormat('l, d F Y') }}</td>
                 </tr>
             @endforeach

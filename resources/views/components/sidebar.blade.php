@@ -27,12 +27,12 @@
 
         <!-- Data Petugas -->
         @if (Auth::user()->is_admin == 1)
-        <li class="menu-item {{ Request::is('admin/karyawan*') ? 'active' : '' }}">
-            <a href="{{ route('karyawan.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-id-card"></i>
-                <div>Data Petugas</div>
-            </a>
-        </li>
+            <li class="menu-item {{ Request::is('admin/karyawan*') ? 'active' : '' }}">
+                <a href="{{ route('karyawan.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-id-card"></i>
+                    <div>Data Petugas</div>
+                </a>
+            </li>
         @endif
 
         <!-- Data Barang -->
@@ -45,12 +45,12 @@
 
         <!-- Data Ruangan -->
         @if (Auth::user()->is_admin == 1)
-        <li class="menu-item {{ Request::is('admin/ruangan*') ? 'active' : '' }}">
-            <a href="{{ route('ruangan.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-building-house"></i>
-                <div>Data Ruangan</div>
-            </a>
-        </li>
+            <li class="menu-item {{ Request::is('admin/ruangan*') ? 'active' : '' }}">
+                <a href="{{ route('ruangan.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-building-house"></i>
+                    <div>Data Ruangan</div>
+                </a>
+            </li>
         @endif
 
         <!-- Data Barang Ruangan -->
