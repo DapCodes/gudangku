@@ -136,19 +136,24 @@ class PeminjamanController extends Controller
         $ruanganIdsWithBarang = BarangRuangans::distinct()->pluck('ruangan_id');
 
         // Ambil data barang sesuai status user
-        $barang = ($user->status_user === 'admin' || $user->status_user === 'Umum')
-            ? Barangs::all()
-            : Barangs::where('status_barang', $user->status_user)->get();
+        if ($user->status_user === 'admin') {
+            $barang = Barangs::all();
+        } else {
+            $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])->get();
+        }
 
         // Ambil ruangan yang memiliki barang dan sesuai status user
-        $ruangan = ($user->status_user === 'admin' || $user->status_user === 'Umum')
-            ? Ruangans::whereIn('id', $ruanganIdsWithBarang)->get()
-            : Ruangans::whereIn('id', $ruanganIdsWithBarang)
-                    ->where('deskripsi', $user->status_user)
-                    ->get();
+        if ($user->status_user === 'admin') {
+            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)->get();
+        } else {
+            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)
+                        ->where('deskripsi', $user->status_user)
+                        ->get();
+        }
 
         return view('peminjaman.create', compact('barang', 'ruangan'));
     }
+
 
 
     /**
@@ -246,17 +251,24 @@ class PeminjamanController extends Controller
     {
         $user = Auth::user();
         $peminjaman = Peminjamans::findOrFail($id);
-    
-        if ($user->status_user === 'admin' || $user->status_user === 'Umum') {
+
+        // Ambil ID ruangan yang memiliki barang
+        $ruanganIdsWithBarang = BarangRuangans::distinct()->pluck('ruangan_id');
+
+        // Ambil data barang
+        if ($user->status_user === 'admin') {
             $barang = Barangs::all();
-            $ruangan = Ruangans::all();
+            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)->get();
         } else {
-            $barang = Barangs::where('status_barang', $user->status_user)->get();
-            $ruangan = Ruangans::where('deskripsi', $user->status_user)->get(); // Sesuaikan kolom filter jika ada
+            $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])->get();
+            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)
+                        ->where('deskripsi', $user->status_user)
+                        ->get();
         }
-    
+
         return view('peminjaman.edit', compact('peminjaman', 'barang', 'ruangan'));
     }
+
     
 
     /**

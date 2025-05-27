@@ -86,21 +86,27 @@ class BarangKeluarController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $barang = ($user->status_user === 'admin' || $user->status_user === 'Umum')
-            ? Barangs::all()
-            : Barangs::where('status_barang', $user->status_user)->get();
+
+        if ($user->status_user === 'admin') {
+            $barang = Barangs::all();
+        } else {
+            $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])->get();
+        }
 
         // Ambil ID ruangan yang memiliki barang
         $ruanganIdsWithBarang = BarangRuangans::distinct()->pluck('ruangan_id');
 
-        $ruangan = ($user->status_user === 'admin' || $user->status_user === 'Umum')
-            ? Ruangans::whereIn('id', $ruanganIdsWithBarang)->get()
-            : Ruangans::whereIn('id', $ruanganIdsWithBarang)
-                    ->where('deskripsi', $user->status_user)
-                    ->get();
+        if ($user->status_user === 'admin') {
+            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)->get();
+        } else {
+            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)
+                        ->where('deskripsi', $user->status_user)
+                        ->get();
+        }
 
         return view('barangkeluar.create', compact('barang', 'ruangan'));
     }
+
 
 
     /**
@@ -200,16 +206,17 @@ class BarangKeluarController extends Controller
         return view('barangkeluar.show', compact('barangKeluar'));
     }
 
+
     public function edit($id)
     {
         $user = Auth::user();
         $barangKeluar = BarangKeluars::findOrFail($id);
 
-        if ($user->status_user === 'admin' || $user->status_user === 'Umum') {
+        if ($user->status_user === 'admin') {
             $barang = Barangs::all();
             $ruangan = Ruangans::all();
         } else {
-            $barang = Barangs::where('status_barang', $user->status_user)->get();
+            $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])->get();
             $ruangan = Ruangans::where('deskripsi', $user->status_user)->get();
         }
 
@@ -219,6 +226,7 @@ class BarangKeluarController extends Controller
 
         return view('barangkeluar.edit', compact('barang', 'ruangan', 'barangKeluar', 'barangRuangan'));
     }
+
 
     
     public function update(Request $request, $id)
