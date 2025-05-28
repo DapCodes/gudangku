@@ -80,6 +80,9 @@
                     @if ($status == 'TKRO')
                         <input type="text" name="status_barang" id="status_barang" value="TKRO" hidden>
                     @endif
+                    @if ($status == 'Umum')
+                        <input type="text" name="status_barang" id="status_barang" value="Umum" hidden>
+                    @endif
                     @if ($status == 'admin')
                         <div class="row mb-3">
                             <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Status Petugas</label>

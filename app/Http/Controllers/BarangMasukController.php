@@ -99,16 +99,13 @@ class BarangMasukController extends Controller
 
         // Ambil data ruangan
         if ($user->status_user === 'admin') {
-            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)->get();
+            $ruangan = Ruangans::all();
         } else {
-            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)
-                        ->where('deskripsi', $user->status_user)
-                        ->get();
+            $ruangan = Ruangans::where('deskripsi', $user->status_user)->get();
         }
 
         return view('barangmasuk.create', compact('barang', 'ruangan'));
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -203,26 +200,16 @@ class BarangMasukController extends Controller
         $user = Auth::user();
         $barangMasuk = BarangMasuks::findOrFail($id);
 
-        // Ambil ID ruangan yang memiliki barang
-        $ruanganIdsWithBarang = BarangRuangans::distinct()->pluck('ruangan_id');
+        // Barang: tampilkan jika status_barang = 'Umum' ATAU status_barang = status_user
+        $barang = Barangs::where(function ($query) use ($user) {
+            $query->where('status_barang', 'Umum')
+                ->orWhere('status_barang', $user->status_user);
+        })->get();
 
-        // Ambil data barang
-        if ($user->status_user === 'admin') {
-            $barang = Barangs::all();
-        } else {
-            $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])->get();
-        }
+        // Ruangan: hanya tampilkan jika deskripsi = status_user
+        $ruangan = Ruangans::where('deskripsi', $user->status_user)->get();
 
-        // Ambil data ruangan
-        if ($user->status_user === 'admin') {
-            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)->get();
-        } else {
-            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)
-                        ->where('deskripsi', $user->status_user)
-                        ->get();
-        }
-
-        // Ambil data relasi barang dengan ruangan
+        // Cari barangRuangan berdasarkan barang_id yang ada di $barangMasuk
         $barangRuangan = BarangRuangans::where('barang_id', $barangMasuk->id_barang)->first();
 
         return view('barangmasuk.edit', compact('barangMasuk', 'barang', 'ruangan', 'barangRuangan'));
