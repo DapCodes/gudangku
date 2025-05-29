@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\Peminjamans;
 use App\Models\Barangs;
@@ -429,43 +430,50 @@ class PeminjamanController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
     public function destroy($id)
     {
         $peminjaman = Peminjamans::findOrFail($id);
-        $barang = Barangs::findOrFail($peminjaman->id_barang);
 
-        // Tidak bisa menghapus jika masih dalam status "Sedang Dipinjam"
-        if ($peminjaman->status == "Sedang Dipinjam") {
-            Alert::warning('Warning', 'Data Tidak Bisa Dihapus')->autoClose(2500);
+        // Tidak bisa menghapus jika status masih "Sedang Dipinjam"
+        if ($peminjaman->status === "Sedang Dipinjam") {
+            Alert::warning('Warning', 'Data tidak bisa dihapus karena masih dalam status "Sedang Dipinjam"')->autoClose(5000);
             return redirect()->route('peminjaman.index');
         }
 
-        // Kembalikan stok ke barangs (gudang utama)
-        $barang->stok += $peminjaman->jumlah;
-        $barang->save();
+        DB::beginTransaction();
 
-        // Kembalikan stok ke barang_ruangans
-        $barangRuangan = BarangRuangans::where('barang_id', $peminjaman->id_barang)
-                        ->where('ruangan_id', $peminjaman->ruangan_id)
-                        ->first();
+        try {
+            $barang = Barangs::findOrFail($peminjaman->id_barang);
 
-        if ($barangRuangan) {
-            $barangRuangan->stok += $peminjaman->jumlah;
-            $barangRuangan->save();
-        } else {
-            BarangRuangans::create([
+            // Kembalikan stok ke gudang utama
+            $barang->stok += $peminjaman->jumlah;
+            $barang->save();
+
+            // Kembalikan stok ke barang_ruangans
+            $barangRuangan = BarangRuangans::firstOrNew([
                 'barang_id' => $peminjaman->id_barang,
                 'ruangan_id' => $peminjaman->ruangan_id,
-                'stok' => $peminjaman->jumlah,
             ]);
+
+            $barangRuangan->stok += $peminjaman->jumlah;
+            $barangRuangan->save();
+
+            // Hapus data peminjaman
+            $peminjaman->delete();
+
+            DB::commit();
+
+            Alert::success('Success', 'Data berhasil dihapus')->autoClose(5000);
+            return redirect()->route('pengembalian.index');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Alert::error('Error', 'Terjadi kesalahan saat menghapus data')->autoClose(5000);
+            return redirect()->route('peminjaman.index');
         }
-
-        // Hapus data peminjaman
-        $peminjaman->delete();
-
-        Alert::success('Success', 'Data Berhasil Dihapus')->autoClose(2500);
-        return redirect()->route('pengembalian.index');
     }
+
 
     public function getBarangByRuangan($ruanganId)
     {

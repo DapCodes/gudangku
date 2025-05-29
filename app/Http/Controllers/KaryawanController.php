@@ -31,7 +31,8 @@ class KaryawanController extends Controller
             ->when($keyword, function ($query) use ($keyword) {
                 // Menambahkan filter pencarian berdasarkan nama atau email
                 $query->where('name', 'like', "%$keyword%")
-                    ->orWhere('email', 'like', "%$keyword%");
+                    ->orWhere('email', 'like', "%$keyword%")
+                    ->orWhere('status_user', 'like', "%$keyword%");
             });
 
         // Ambil hasil query sesuai filter
@@ -99,17 +100,6 @@ class KaryawanController extends Controller
 
         Alert::success('Berhasil!', 'Data Berhasil Ditambahkan');
         return redirect()->route('karyawan.index');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
     }
 
     /**

@@ -121,8 +121,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <span class="fw-semibold d-block mb-1">Barang Masuk</span>
-                            <small class="text-muted">total stok</small>
+                            <span class="fw-semibold d-block mb-1">Keseluruhan</span>
+                            <small class="text-muted">total barang</small>
                             <h3 class="card-title mb-2">{{ $totalStokMasuk }}</h3>
 
                         </div>
@@ -147,7 +147,7 @@
                                 </div>
                             </div>
                             <span class="fw-semibold d-block mb-1">Barang Keluar</span>
-                            <small class="text-muted">total stok</small>
+                            <small class="text-muted">jumlah</small>
                             <h3 class="card-title mb-2">{{ $totalStokKeluar }}</h3>
 
                         </div>

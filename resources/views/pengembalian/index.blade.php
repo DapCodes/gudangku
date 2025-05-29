@@ -64,7 +64,7 @@
                 <tbody class="table-border-bottom-0">
                     @foreach ($pengembalian as $item)
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $loop->iteration + ($pengembalian->firstItem() - 1) }}</td>
                             <td>{{ $item->kode_barang }}</td>
                             <td>{{ $item->barang->nama . ' - ' . $item->barang->merek }}</td>
                             <td>{{ $item->barang->kode_barang }}</td>
@@ -91,7 +91,7 @@
 
                                         <!-- Form Delete (Disembunyikan) -->
                                         <form id="form-delete-{{ $item->id }}"
-                                            action="{{ route('peminjaman.destroy', $item->id) }}" method="POST"
+                                            action="{{ route('pengembalian.destroy', $item->id) }}" method="POST"
                                             style="display: none;">
                                             @csrf
                                             @method('DELETE')

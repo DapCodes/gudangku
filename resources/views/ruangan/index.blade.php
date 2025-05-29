@@ -52,7 +52,7 @@
                 <tbody class="table-border-bottom-0">
                     @foreach ($ruangan as $item)
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $loop->iteration + ($ruangan->firstItem() - 1) }}</td>
                             <td>{{ $item->nama_ruangan }}</td>
                             <td>{{ $item->deskripsi }}</td>
                             <td style="overflow: visible;">
@@ -72,7 +72,7 @@
 
                                         <!-- Form Delete (Disembunyikan) -->
                                         <form id="form-delete-{{ $item->id }}"
-                                            action="{{ route('peminjaman.destroy', $item->id) }}" method="POST"
+                                            action="{{ route('ruangan.destroy', $item->id) }}" method="POST"
                                             style="display: none;">
                                             @csrf
                                             @method('DELETE')

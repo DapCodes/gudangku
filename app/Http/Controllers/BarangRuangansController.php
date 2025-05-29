@@ -28,16 +28,16 @@ class BarangRuangansController extends Controller
         $barangRuanganQuery = BarangRuangans::with(['ruangan', 'barang'])
             ->join('barangs', 'barang_ruangans.barang_id', '=', 'barangs.id')
             ->join('ruangans', 'barang_ruangans.ruangan_id', '=', 'ruangans.id')
-            ->select('barang_ruangans.*') // Penting agar model tetap dikenali
+            ->select('barang_ruangans.*')
             ->where('barang_ruangans.stok', '>', 0)
             ->orderBy('ruangans.nama_ruangan', 'asc');
 
-        // Filter user non-admin berdasarkan status_barang
+        // Filter berdasarkan deskripsi ruangan (akses user)
         if ($user->status_user !== 'admin') {
-            $barangRuanganQuery->where('barangs.status_barang', $user->status_user);
+            $barangRuanganQuery->where('ruangans.deskripsi', $user->status_user);
         }
 
-        // Filter berdasarkan ruangan
+        // Filter berdasarkan ruangan (byClass)
         if ($byClass) {
             $barangRuanganQuery->where('barang_ruangans.ruangan_id', $byClass);
         }
@@ -47,16 +47,16 @@ class BarangRuangansController extends Controller
             $barangRuanganQuery->where(function ($query) use ($keyword) {
                 $query->whereHas('ruangan', function ($q) use ($keyword) {
                     $q->where('nama_ruangan', 'like', "%$keyword%")
-                      ->orWhere('deskripsi', 'like', "%$keyword%");
+                    ->orWhere('deskripsi', 'like', "%$keyword%");
                 })
                 ->orWhereHas('barang', function ($q) use ($keyword) {
                     $q->where('nama', 'like', "%$keyword%")
-                      ->orWhere('merek', 'like', "%$keyword%");
+                    ->orWhere('merek', 'like', "%$keyword%");
                 });
             });
         }
 
-        // Ekspor Excel / PDF
+        // Export
         if ($exportType) {
             $barangRuangan = $barangRuanganQuery->get();
 
@@ -70,12 +70,18 @@ class BarangRuangansController extends Controller
             }
         }
 
-        // Pagination dan tampilkan ke view
+        // Pagination dan view
         $barangRuangan = $barangRuanganQuery->paginate(10);
-        $ruangan = Ruangans::orderBy('nama_ruangan')->get();
+        $ruangan = Ruangans::whereHas('barangRuangan', function ($query) {
+            $query->where('stok', '>', 0);
+        })
+        ->orderBy('nama_ruangan')
+        ->get();
+
 
         return view('barangruangan.index', compact('barangRuangan', 'ruangan', 'keyword', 'byClass'));
     }
+
 
     public function show($id)
     {

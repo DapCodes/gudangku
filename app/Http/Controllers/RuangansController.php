@@ -88,30 +88,6 @@ class RuangansController extends Controller
         return redirect()->route('ruangan.index')->with('success', 'Data barang berhasil disimpan.');
     }
 
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Ruangans  $ruangans
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Ruangans $ruangans)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Ruangans  $ruangans
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Ruangans $ruangans)
-    {
-        //
-    }
-
-
     public function update(Request $request, $id)
     {
         // Validasi input
@@ -136,8 +112,12 @@ class RuangansController extends Controller
      * @param  \App\Models\Ruangans  $ruangans
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Ruangans $ruangans)
+    public function destroy($id)
     {
-        //
+        $ruangan = Ruangans::findOrFail($id);
+
+        $ruangan->delete();
+        Alert::success('Dihapus!', 'Data Berhasil Dihapus');
+        return redirect()->route('ruangan.index');
     }
 }

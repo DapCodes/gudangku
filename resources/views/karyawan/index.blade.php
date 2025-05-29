@@ -57,7 +57,7 @@
                 <tbody class="table-border-bottom-0">
                     @foreach ($users as $item)
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $loop->iteration + ($users->firstItem() - 1) }}</td>
                             <td>{{ $item->name }}</td>
                             <td>{{ $item->email }}</td>
                             <td>{{ 'Petugas ' . $item->status_user }}</td>

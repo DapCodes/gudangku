@@ -69,7 +69,7 @@
                 <tbody class="table-border-bottom-0">
                     @foreach ($peminjaman as $item)
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $loop->iteration + ($peminjaman->firstItem() - 1) }}</td>
                             <td>{{ $item->kode_barang }}</td>
                             <td>{{ $item->barang->nama . ' - ' . $item->barang->merek }}</td>
                             <td>{{ $item->barang->kode_barang }}</td>

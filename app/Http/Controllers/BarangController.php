@@ -139,20 +139,7 @@ class BarangController extends Controller
 
     }
 
-    public function destroy($id)
-    {
-        $barang = Barangs::findOrFail($id);
-        
-        if ($barang->foto && file_exists(public_path('image/barang/' . $barang->foto))) {
-            unlink(public_path('image/barang/' . $barang->foto));
-        }
-
-        $barang->delete();
-        Alert::warning('Dihapus!', 'Data Berhasil Dihapus');
-        return redirect()->route('barang.index');
-
-    }
-
+    
     public function show($id)
     {
         $barang = Barangs::findOrFail($id);
@@ -168,7 +155,7 @@ class BarangController extends Controller
             $barang = Barangs::where('status_barang', $user->status_user)
                         ->where('id', $id)
                         ->firstOrFail();
-        }
+                    }
 
         return view('barang.edit', compact('barang'));
     }
@@ -211,5 +198,19 @@ class BarangController extends Controller
 
         Alert::success('Berhasil!', 'Data Berhasil Diubah');
         return redirect()->route('barang.index');
+    }
+    
+    public function destroy($id)
+    {
+        $barang = Barangs::findOrFail($id);
+        
+        if ($barang->foto && file_exists(public_path('image/barang/' . $barang->foto))) {
+            unlink(public_path('image/barang/' . $barang->foto));
+        }
+    
+        $barang->delete();
+        Alert::success('Dihapus!', 'Data Berhasil Dihapus');
+        return redirect()->route('barang.index');
+    
     }
 }

@@ -89,4 +89,13 @@ class PengembalianController extends Controller
         $barang = Barangs::findOrFail($pengembalian->id_barang);
         return view('pengembalian.show', compact('pengembalian', 'barang'));
     }
+
+    public function destroy($id)
+    {
+        $pengembalian = Pengembalians::findOrFail($id);
+    
+        $pengembalian->delete();
+        Alert::success('Dihapus!', 'Data Berhasil Dihapus');
+        return redirect()->route('pengembalian.index');
+    }
 }

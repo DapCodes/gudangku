@@ -64,7 +64,7 @@
                 <tbody class="table-border-bottom-0">
                     @foreach ($barangRuangan as $item)
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $loop->iteration + ($barangRuangan->firstItem() - 1) }}</td>
                             <td>{{ $item->ruangan->nama_ruangan }}</td>
                             <td>{{ $item->barang->nama }}</td>
                             <td>{{ $item->stok }}</td>

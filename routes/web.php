@@ -68,13 +68,11 @@ Route::prefix('admin')->middleware('auth', RoleMiddleware::class)->group(functio
     Route::get('admin/brg-keluar-export-excel', [BarangKeluarController::class, 'exportExcel'])->name('brg-keluar.export.excel');
     Route::get('/get-barang-by-ruangan/{ruanganId}', [BarangKeluarController::class, 'getBarangByRuangan']);
 
-
     // Peminjaman Routes
     Route::resource('peminjaman', PeminjamanController::class);
     Route::get('peminjaman-export', [PeminjamanController::class, 'export'])->name('peminjaman.export');
     Route::get('admin/peminjaman-export-excel', [PeminjamanController::class, 'exportExcel'])->name('peminjaman.export.excel');
     Route::get('/get-barang-by-ruangan/{ruanganId}', [BarangKeluarController::class, 'getBarangByRuangan']);
-
 
     // Pengembalian Routes
     Route::resource('pengembalian', PengembalianController::class);
