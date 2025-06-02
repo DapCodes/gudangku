@@ -65,8 +65,8 @@
         <thead>
             <tr>
                 <th>No</th>
-                <th>Nama Barang</th>
                 <th>Ruangan</th>
+                <th>Nama Barang</th>
                 <th>Jumlah</th>
             </tr>
         </thead>
@@ -74,8 +74,8 @@
             @foreach ($barangRuangan as $i => $item)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->barang->nama . ' - ' . $item->barang->merek }}</td>
                     <td>{{ $item->ruangan->nama_ruangan }}</td>
+                    <td>{{ $item->barang->nama . ' - ' . $item->barang->merek }}</td>
                     <td>{{ $item->stok }}</td>
                 </tr>
             @endforeach

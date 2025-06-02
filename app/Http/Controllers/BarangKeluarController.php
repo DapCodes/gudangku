@@ -49,11 +49,12 @@ class BarangKeluarController extends Controller
             $query->whereDate('tanggal_keluar', '<=', $endDate);
         })
         ->when($user->status_user !== 'admin', function ($query) use ($user) {
-            $query->whereHas('barang', function ($q) use ($user) {
-                $q->where('status_barang', $user->status_user);
+            $query->whereHas('ruangan', function ($q) use ($user) {
+                $q->where(function ($q2) use ($user) {
+                    $q2->Where('deskripsi', $user->status_user);
+                });
             });
         });
-
         $barangKeluar = $query->get();
 
         // Export jika ada request

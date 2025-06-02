@@ -7,6 +7,7 @@ use App\Models\Peminjamans;
 use App\Models\Pengembalians;
 use App\Models\User;
 use App\Models\BarangMasuks;
+use App\Models\Ruangans;
 use App\Models\BarangKeluars;
 
 class HomeController extends Controller
@@ -18,22 +19,68 @@ class HomeController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
+
+        // Cek apakah user adalah admin
+        $isAdmin = $user->status_user === 'admin';
+
+        // Barang (semua tetap dihitung)
         $barang = Barangs::count();
-        $peminjaman = Peminjamans::where('status', 'Sedang Dipinjam')->count();
-        $pengembalian = Pengembalians::count();
-        $karyawan = User::where('is_admin', 0)->count();
-        $barangMasuk = BarangMasuks::count();
-        $barangKeluar = BarangKeluars::count();
 
-        // Mengambil total stok masuk dan keluar
-        $totalStokMasuk = BarangMasuks::sum('jumlah'); // Sesuaikan nama kolom jika bukan 'jumlah'
-        $totalStokKeluar = BarangKeluars::sum('jumlah'); // Sesuaikan nama kolom juga
+        // Peminjaman
+        $peminjaman = Peminjamans::when(!$isAdmin, function ($query) use ($user) {
+            $query->whereHas('ruangan', function ($q) use ($user) {
+                $q->where('deskripsi', $user->status_user);
+            });
+        })->where('status', 'Sedang Dipinjam')->count();
 
-        $total = $barang + $peminjaman + $pengembalian + $karyawan + $barangMasuk + $barangKeluar;
+        // Pengembalian
+        $pengembalian = Pengembalians::when(!$isAdmin, function ($query) use ($user) {
+            $query->whereHas('ruangan', function ($q) use ($user) {
+                $q->where('deskripsi', $user->status_user);
+            });
+        })->count();
+
+        // Ruangan
+        $ruangan = Ruangans::when(!$isAdmin, function ($query) use ($user) {
+            $query->where(function ($q) use ($user) {
+                $q->Where('deskripsi', $user->status_user);
+            });
+        })->count();
+
+        // Barang Masuk
+        $barangMasuk = BarangMasuks::when(!$isAdmin, function ($query) use ($user) {
+            $query->whereHas('ruangan', function ($q) use ($user) {
+                $q->where('deskripsi', $user->status_user);
+            });
+        })->count();
+
+        // Barang Keluar
+        $barangKeluar = BarangKeluars::when(!$isAdmin, function ($query) use ($user) {
+            $query->whereHas('ruangan', function ($q) use ($user) {
+                $q->where('deskripsi', $user->status_user);
+            });
+        })->count();
+
+        // Total Stok Masuk
+        $totalStokMasuk = BarangMasuks::when(!$isAdmin, function ($query) use ($user) {
+            $query->whereHas('ruangan', function ($q) use ($user) {
+                $q->where('deskripsi', $user->status_user);
+            });
+        })->sum('jumlah');
+
+        // Total Stok Keluar
+        $totalStokKeluar = BarangKeluars::when(!$isAdmin, function ($query) use ($user) {
+            $query->whereHas('ruangan', function ($q) use ($user) {
+                $q->where('deskripsi', $user->status_user);
+            });
+        })->sum('jumlah');
+
+        $total = $barang + $peminjaman + $pengembalian + $ruangan + $barangMasuk + $barangKeluar;
 
         $chartData = [
-            'labels' => ['Barang', 'Petugas', 'Barang Masuk', 'Barang Keluar', 'Peminjaman', 'Pengembalian'],
-            'series' => [$barang, $karyawan, $barangMasuk, $barangKeluar, $peminjaman, $pengembalian],
+            'labels' => ['Barang', 'Ruangan', 'Barang Masuk', 'Barang Keluar', 'Peminjaman', 'Pengembalian'],
+            'series' => [$barang, $ruangan, $barangMasuk, $barangKeluar, $peminjaman, $pengembalian],
             'pinjamkembali' => ['Peminjaman', 'Pengembalian'],
             'pinjamkembaliseries' => [$peminjaman, $pengembalian]
         ];
@@ -43,7 +90,7 @@ class HomeController extends Controller
             'barang',
             'peminjaman',
             'pengembalian',
-            'karyawan',
+            'ruangan',
             'barangMasuk',
             'barangKeluar',
             'total',
@@ -51,5 +98,6 @@ class HomeController extends Controller
             'totalStokKeluar'
         ));
     }
+
 
 }

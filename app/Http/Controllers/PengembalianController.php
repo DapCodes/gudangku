@@ -57,8 +57,10 @@ class PengembalianController extends Controller
                 $query->whereDate('tanggal_kembali', '<=', $endDate);
             })
             ->when($user->status_user !== 'admin', function ($query) use ($user) {
-                $query->whereHas('barang', function ($q) use ($user) {
-                    $q->where('status_barang', $user->status_user);
+                $query->whereHas('ruangan', function ($q) use ($user) {
+                    $q->where(function ($q2) use ($user) {
+                    $q2->Where('deskripsi', $user->status_user);
+                    });
                 });
             });
 
