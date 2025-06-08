@@ -108,6 +108,7 @@ class BarangController extends Controller
             'nama' => 'required',
             'merek' => 'required',
             'foto' => 'image|required|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'status_barang' => 'required',
         ],
         [
             'nama.required' => 'Nama Barang tidak boleh kosong',
@@ -116,6 +117,7 @@ class BarangController extends Controller
             'foto.image' => 'File yang diupload harus berupa gambar',
             'foto.mimes' => 'File yang diupload harus berupa jpeg, png, jpg, gif',
             'foto.max' => 'Ukuran file tidak boleh lebih dari 2MB',
+            'status_barang.required' => 'Pilih status barang dengan benar (RPL, TBSM, TKRO, Umum)',
         ]);
 
 
