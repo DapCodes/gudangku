@@ -33,10 +33,14 @@ class BarangKeluarController extends Controller
         ->when($keyword, function ($query) use ($keyword) {
             $query->whereHas('barang', function ($q) use ($keyword) {
                 $q->where('nama', 'like', "%$keyword%")
-                  ->orWhere('merek', 'like', "%$keyword%");
+                  ->orWhere('merek', 'like', "%$keyword%")
+                  ->orWhere('status_barang', 'like', "%$keyword%");
             })
             ->orWhereHas('ruangan', function ($q) use ($keyword) {
                 $q->where('nama_ruangan', 'like', "%$keyword%");
+            })
+            ->orWhereHas('user', function ($query) use ($keyword) {
+                $query->where('name', 'like', "%$keyword%");
             });
         })
         ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
@@ -183,6 +187,10 @@ class BarangKeluarController extends Controller
             $barangKeluar->keterangan = $request->keterangan;
             $barangKeluar->id_barang = $request->id_barang;
             $barangKeluar->ruangan_id = $request->deskripsi ?? null;
+
+            $userId = Auth::user();
+            $barangKeluar->id_user = $userId->id;
+
             $barangKeluar->save();
 
             DB::commit();
@@ -218,7 +226,7 @@ class BarangKeluarController extends Controller
             $ruangan = Ruangans::all();
         } else {
             $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])->get();
-            $ruangan = Ruangans::where('deskripsi', $user->status_user)->get();
+            $ruangan = Ruangans::where('deskripsi', [$user->status_user])->get();
         }
 
         $barangRuangan = BarangRuangans::where('barang_id', $barangKeluar->id_barang)
@@ -300,6 +308,9 @@ class BarangKeluarController extends Controller
         $barangKeluar->tanggal_keluar = $request->tanggal_keluar;
         $barangKeluar->keterangan = $request->keterangan;
         $barangKeluar->ruangan_id = $request->ruangan_id;
+
+        $barangKeluar->id_user = $barangKeluar->id_user;        
+
         $barangKeluar->save();
 
         Alert::success('Berhasil!', 'Data berhasil diperbarui.');

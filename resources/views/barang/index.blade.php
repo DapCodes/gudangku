@@ -4,67 +4,72 @@
 @section('content')
     @include('sweetalert::alert')
     <div class="card mb-5">
-        <div class="px-3 py-3 d-flex justify-content-between">
-            <div>
-                <form action="{{ route('barang.index') }}" method="GET" class="d-flex justify-content-between gap-1">
-                    <a href="{{ route('barang.create') }}">
-                        <button type="button" class="btn btn-primary">
-                            <i class="bx bx-folder-plus" style="position: relative; bottom: 2px;"></i>
-                            Tambah Data
-                        </button>
-                    </a>
+       <div class="p-3">
 
-                    <!-- Tombol untuk PDF -->
-                    <button type="submit" name="export" class="btn btn-danger" value="pdf">
-                        <i class="bx bxs-file-pdf" style="position: relative; bottom: 2px;"></i>
-                    </button>
+        {{-- Tombol Tambah & Ekspor --}}
+        <div class="mb-3 d-flex flex-wrap gap-2">
+            <a href="{{ route('barang.create') }}" class="btn btn-primary">
+                <i class="bx bx-folder-plus" style="position: relative; bottom: 2px;"></i> Tambah Data Barang
+            </a>
 
-                    <!-- Tombol untuk Excel -->
-                    <button type="submit" name="export" class="btn btn-success" value="excel">
-                        <i class="bx bx-spreadsheet" style="position: relative; bottom: 2px;"></i>
-                    </button>
+            <form action="{{ route('barang.index') }}" method="GET" >
+            <div class="d-flex flex-wrap gap-2">
+                <button type="submit" name="export" value="pdf" class="btn btn-danger">
+                    <i class="bx bxs-file-pdf" style="position: relative; bottom: 2px;"></i> Ekspor PDF
+                </button>
 
-            </div>
-
-            <div class="d-flex align-items-center border-start ps-3 gap-1">
-                <i class="bx bx-search fs-4 lh-0 me-2"></i>
-
-                <input type="text" name="search" class="form-control border-0 shadow-none" placeholder="Cari..."
-                    aria-label="Cari..." value="{{ request('search') }}" />
-
-                <button class="btn btn-primary" type="submit">Cari</button>
-
-                @if ((request()->has('search') && request()->search != '') || request()->has('start_date') || request()->has('end_date'))
-                    <a href="{{ route('barang.index') }}" class="btn btn-secondary">
-                        <i class="bx bx-refresh"></i>
-                    </a>
-                @endif
-                </form>
+                <button type="submit" name="export" value="excel" class="btn btn-success">
+                    <i class="bx bx-spreadsheet" style="position: relative; bottom: 2px;"></i> Ekspor Excel
+                </button>
             </div>
         </div>
-        <div class="d-flex align-items-center gap-1 my-2" style="position:relative; left: 17px;">
-            @php
-                $status = Auth::user()->status_user;
-            @endphp
-            @if ($status == 'admin')
-                @php
-                    $statusList = ['TBSM', 'RPL', 'TKRO', 'UMUM']; // Sesuaikan dengan status yang ada
-                    $activeStatus = request()->get('status_barang');
-                @endphp
-                @foreach ($statusList as $s)
-                    <a href="{{ route('barang.index', array_merge(request()->query(), ['status_barang' => $s])) }}"
-                        class="btn btn-sm {{ $activeStatus == $s ? 'btn-primary' : 'btn-outline-primary' }}">
-                        {{ strtoupper($s) }}
-                    </a>
-                @endforeach
 
-                {{-- Tombol untuk reset filter status --}}
-                @if (request()->has('status_barang'))
-                    <a href="{{ route('barang.index', array_merge(request()->except('status_barang'))) }}"
-                        class="btn btn-sm btn-secondary">Reset</a>
-                @endif
+        <div action="{{ route('barang.index') }}" method="GET" class="card p-3 shadow-sm mb-3">
+        <div class="row g-3 align-items-end">
+
+            {{-- Pencarian --}}
+            <div class="col-md-4">
+                <label for="search" class="form-label">Pencarian</label>
+                <input type="text" name="search" class="form-control" placeholder="Nama, kode, merek..."
+                    value="{{ request('search') }}">
+            </div>
+
+            {{-- Filter Status --}}
+            @if (Auth::user()->status_user == 'admin')
+                <div class="col-md-4">
+                    <label for="status_barang" class="form-label">Status Barang</label>
+                    <select name="status_barang" id="status_barang" class="form-select">
+                        <option value="">Semua Status</option>
+                        @foreach ($statusOptions as $option)
+                            <option value="{{ $option }}" {{ request('status_barang') == $option ? 'selected' : '' }}>
+                                {{ strtoupper($option) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
             @endif
+
+            {{-- Tombol --}}
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bx bx-search"></i> Cari
+                </button>
+                @if (request()->has('search') || request()->has('status_barang'))
+                    <a href="{{ route('barang.index') }}" class="btn btn-secondary">
+                        <i class="bx bx-refresh"></i> Reset
+                    </a>
+                @endif
+            </div>
+
         </div>
+</div>
+</form>
+
+
+        
+
+    </div>
+
 
         <div class="table-responsive text-nowrap mb-2">
             <table class="table table-striped">
@@ -82,6 +87,7 @@
                         @if ($status == 'admin')
                             <th>Status</th>
                         @endif
+                        <th>Kreator</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -103,6 +109,7 @@
                             @if ($status == 'admin')
                                 <td>{{ $data->status_barang }}</td>
                             @endif
+                            <td>{{ $data->user->name }}</td>
                             <td style="overflow: visible;">
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow"

@@ -7,7 +7,7 @@
     <div class="col-xxl">
         <div class="card mb-4">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Tambah data barang</h5>
+                <h5 class="mb-0">Tambah data Barang Masuk</h5>
                 <a href="{{ route('brg-masuk.index') }}">
                     <button class="btn btn-outline-secondary">
                         Kembali
@@ -62,13 +62,13 @@
                         <div class="col-sm-10">
                             <div class="input-group input-group-merge">
                                 <select name="deskripsi" id="deskripsi" class="form-control">
-                                    <option>Pilih Ruang</option>
+                                    <option disabled selected>Pilih Ruang</option>
                                     @foreach ($ruangan as $item)
                                         <option value="{{ $item->id }}"> {{ $item->nama_ruangan }} </option>
                                     @endforeach
                                 </select>
                             </div>
-                            @error('status_user')
+                            @error('ruangan_id')
                                 <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
                                     <i class="bx bx-error-circle"></i>
                                     <p>{{ $message }}</p>
@@ -116,8 +116,7 @@
                             <div class="input-group input-group-merge">
                                 <span id="basic-icon-default-company2" class="input-group-text"><i
                                         class="bx bx-note"></i></span>
-                                <input name="keterangan" type="text" class="form-control"
-                                    placeholder="Barang dalam keadaan baik" />
+                                <textarea name="keterangan" type="text" class="form-control"></textarea>
                             </div>
                             @error('keterangan')
                                 <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">

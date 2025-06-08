@@ -53,28 +53,12 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="current_password">Kata Sandi Lama</label>
-                        <div class="col-sm-10">
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text cursor-pointer"><i class="bx bx-lock-open"></i></span>
-                                <input id="current_password" type="password" class="form-control" name="current_password"
-                                    placeholder="Masukan Password Lama (Wajib)">
-                            </div>
-                            @error('current_password')
-                                <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
-                                    <i class="bx bx-error-circle"></i>
-                                    <p>{{ $message }}</p>
-                                </div>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Kata Sandi Baru</label>
                         <div class="col-sm-10">
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                 <input id="password" type="password" class="form-control" name="password"
-                                    placeholder="Masukan Password Baru (Opsional)">
+                                    placeholder="Masukan Kata Sandi Baru (Opsional)">
                             </div>
                             @error('password')
                                 <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">
@@ -85,12 +69,12 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="password_confirmation">Konfirmasi Kata Sandi</label>
+                        <label class="col-sm-2 col-form-label" for="password_confirmation">Konfirmasi Sandi</label>
                         <div class="col-sm-10">
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text cursor-pointer"><i class="bx bx-lock"></i></span>
                                 <input id="password_confirmation" type="password" class="form-control"
-                                    name="password_confirmation" placeholder="Konfirmasi Password Baru (Opsional)">
+                                    name="password_confirmation" placeholder="Konfirmasi Kata Sandi Baru (Opsional)">
                             </div>
                             @error('password_confirmation')
                                 <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">

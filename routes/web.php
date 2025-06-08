@@ -12,6 +12,7 @@ use App\Http\Controllers\PengembalianController;
 use App\Http\Controllers\RuangansController;
 use App\Http\Controllers\BarangRuangansController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\StatistikController;
 
 // Middleware
 use App\Http\Middleware\RoleMiddleware;
@@ -46,6 +47,9 @@ Route::prefix('admin')->middleware('auth', RoleMiddleware::class)->group(functio
 
     // Admin Home route (changed from resource)
     Route::get('home', [HomeController::class, 'index'])->name('admin.home');
+
+    // Admin Statistik
+    Route::get('statistik', [StatistikController::class, 'index'])->name('admin.statistik');
 
     // Barang Routes
     Route::resource('barang', BarangController::class);

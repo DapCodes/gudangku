@@ -4,50 +4,65 @@
 @section('content')
     @include('sweetalert::alert')
     <div class="card">
-        <div class="px-3 py-3 d-flex justify-content-between">
-            <div>
-                <form action="{{ route('peminjaman.index') }}" method="GET" class="d-flex justify-content-between gap-1">
-                    <a href="{{ route('peminjaman.create') }}">
-                        <button type="button" class="btn btn-primary">
-                            <i class="bx bx-folder-plus" style="position: relative; bottom: 2px;"></i>
-                            Tambah
-                        </button>
-                    </a>
+        <div class="p-3">
+    {{-- Tombol Aksi --}}
+    <div class="mb-3 d-flex flex-wrap gap-2">
+        <a href="{{ route('peminjaman.create') }}" class="btn btn-primary">
+            <i class="bx bx-folder-plus"></i> Tambah Peminjaman
+        </a>
 
-                    <button type="submit" name="export" class="btn btn-danger" value="pdf">
-                        <i class="bx bxs-file-pdf" style="position: relative; bottom: 2px;"></i>
-                    </button>
+        <form action="{{ route('peminjaman.index') }}" method="GET">
+            <div class="d-flex flex-wrap gap-2">
+            <button type="submit" name="export" value="pdf" class="btn btn-danger">
+                <i class="bx bxs-file-pdf"></i> Ekspor PDF
+            </button>
 
+            <button type="submit" name="export" value="excel" class="btn btn-success">
+                <i class="bx bx-spreadsheet"></i> Ekspor Excel
+            </button>
+            </div>
+    </div>
 
-                    <button type="submit" name="export" class="btn btn-success" value="excel">
-                        <i class="bx bx-spreadsheet" style="position: relative; bottom: 2px;"></i>
-                    </button>
-
+    {{-- Form Filter & Pencarian --}}
+    <div class="card p-3 shadow-sm">
+        <div class="row g-3">
+            {{-- Keyword Pencarian --}}
+            <div class="col-md-6">
+                <label for="search" class="form-label">Cari Peminjaman</label>
+                <input type="text" name="search" class="form-control"
+                    placeholder="Nama peminjam, barang, atau ruangan..."
+                    value="{{ request('search') }}">
             </div>
 
-            <div class="d-flex align-items-center border-start ps-3 gap-1">
-                <i class="bx bx-search fs-4 lh-0 me-2"></i>
+            {{-- Filter Tanggal Pinjam --}}
+            <div class="col-md-3">
+                <label for="start_date" class="form-label">Tanggal Mulai</label>
+                <input type="date" name="start_date" class="form-control"
+                    value="{{ request('start_date') }}">
+            </div>
 
-                <input type="text" name="search" class="form-control border-0 border-bottom shadow-none"
-                    placeholder="Cari..." aria-label="Cari..." value="{{ request('search') }}" />
-
-                <!-- Tambahkan filter tanggal -->
-                <input type="date" name="start_date" class="form-control border-0 shadow-none"
-                    value="{{ request('start_date') }}" />
-                <span class="mx-1"> - </span>
-                <input type="date" name="end_date" class="form-control border-0 shadow-none"
-                    value="{{ request('end_date') }}" />
-
-                <button class="btn btn-primary" type="submit">Cari</button>
-
-                @if ((request()->has('search') && request()->search != '') || request()->has('start_date') || request()->has('end_date'))
-                    <a href="{{ route('peminjaman.index') }}" class="btn btn-secondary">
-                        <i class="bx bx-refresh"></i>
-                    </a>
-                @endif
-                </form>
+            <div class="col-md-3">
+                <label for="end_date" class="form-label">Tanggal Akhir</label>
+                <input type="date" name="end_date" class="form-control"
+                    value="{{ request('end_date') }}">
             </div>
         </div>
+
+        <div class="mt-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="bx bx-search"></i> Cari
+            </button>
+
+            @if ((request()->has('search') && request()->search != '') || request()->has('start_date') || request()->has('end_date'))
+                <a href="{{ route('peminjaman.index') }}" class="btn btn-secondary">
+                    <i class="bx bx-refresh"></i> Reset
+                </a>
+            @endif
+        </div>
+</div>
+</form>
+</div>
+
         <div class="table-responsive text-nowrap">
             <table class="table table-striped">
                 <thead>
@@ -63,6 +78,7 @@
                         <th>Ruangan</th>
                         <th>Status</th>
                         <th>Tenggat</th>
+                        <th>Kreator</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -89,6 +105,7 @@
                                     <span class="text-success">{{ $item->tenggat }}</span>
                                 @endif
                             </td>
+                            <td>{{ $item->user->name }}</td>
 
                             <td style="overflow: visible;">
                                 <div class="dropdown">

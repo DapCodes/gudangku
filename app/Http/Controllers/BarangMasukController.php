@@ -36,10 +36,14 @@ class BarangMasukController extends Controller
             ->when($keyword, function ($query) use ($keyword) {
                 $query->whereHas('barang', function ($q) use ($keyword) {
                     $q->where('nama', 'like', "%$keyword%")
-                    ->orWhere('merek', 'like', "%$keyword%");
+                    ->orWhere('merek', 'like', "%$keyword%")
+                    ->orWhere('status_barang', 'like', "%$keyword%");
                 })
                 ->orWhereHas('ruangan', function ($q) use ($keyword) {
                     $q->where('nama_ruangan', 'like', "%$keyword%");
+                })
+                ->orWhereHas('user', function ($query) use ($keyword) {
+                    $query->where('name', 'like', "%$keyword%");
                 });
             })
             ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
@@ -73,7 +77,7 @@ class BarangMasukController extends Controller
         }
 
         // Jika tidak export, tampilkan dengan paginate
-        $barangMasuk = $query->paginate(10)->withQueryString();
+        $barangMasuk = $query->orderBy('id', 'desc')->paginate(10);
 
         return view('barangmasuk.index', compact('barangMasuk', 'keyword', 'startDate', 'endDate'));
     }
@@ -123,6 +127,7 @@ class BarangMasukController extends Controller
             'jumlah' => 'required|integer|min:1',
             'tanggal_masuk' => 'required|date',
             'keterangan' => 'required|string|max:255',
+            'ruangan_id' => 'integer',
         ],
         [
             'id_barang.required' => 'Barang harus dipilih',
@@ -134,6 +139,7 @@ class BarangMasukController extends Controller
             'keterangan.required' => 'Keterangan harus diisi',
             'keterangan.string' => 'Keterangan harus berupa teks',
             'keterangan.max' => 'Keterangan maksimal 255 karakter',
+            'ruangan_id.int' => 'Pilih Ruangan dengan Benar',
         ]);
 
         
@@ -170,6 +176,9 @@ class BarangMasukController extends Controller
         $barangMasuk->tanggal_masuk = $request->tanggal_masuk;
         $barangMasuk->keterangan = $request->keterangan;
         $barangMasuk->ruangan_id = $request->deskripsi;
+
+        $userId = Auth::user();
+        $barangMasuk->id_user = $userId->id;
 
         $barang = Barangs::findOrFail($request->id_barang);
         $barang->stok += $request->jumlah;
@@ -209,8 +218,13 @@ class BarangMasukController extends Controller
                 ->orWhere('status_barang', $user->status_user);
         })->get();
 
-        // Ruangan: hanya tampilkan jika deskripsi = status_user
-        $ruangan = Ruangans::where('deskripsi', $user->status_user)->get();
+        
+        // Ambil data ruangan
+        if ($user->status_user === 'admin') {
+            $ruangan = Ruangans::all();
+        } else {
+            $ruangan = Ruangans::where('deskripsi', $user->status_user)->get();
+        }
 
         // Cari barangRuangan berdasarkan barang_id yang ada di $barangMasuk
         $barangRuangan = BarangRuangans::where('barang_id', $barangMasuk->id_barang)->first();
@@ -299,6 +313,7 @@ class BarangMasukController extends Controller
          $barangMasuk->tanggal_masuk = $request->tanggal_masuk;
          $barangMasuk->keterangan = $request->keterangan;
          $barangMasuk->ruangan_id = $request->ruangan_id;
+         $barangMasuk->id_user = $barangMasuk->id_user;        
          $barangMasuk->save();
      
          Alert::success('Berhasil!', 'Data berhasil diperbarui.');

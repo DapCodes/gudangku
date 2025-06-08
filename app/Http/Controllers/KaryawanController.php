@@ -49,7 +49,7 @@ class KaryawanController extends Controller
             return $pdf->download('laporan-data-karyawan.pdf');
         }
 
-        $users = $karyawanQuery->paginate(10)->withQueryString();
+        $users = $karyawanQuery->orderBy('id', 'desc')->paginate(10);
 
         // Menampilkan halaman daftar karyawan dengan data yang sudah difilter
         return view('karyawan.index', compact('users', 'keyword'));
@@ -80,14 +80,15 @@ class KaryawanController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users',
             'password' => 'required|string|min:6',
-            'status_user' => 'required|string|max:255',
+            'status_user' => 'required|string|max:4',
         ],
         [
             'name.required' => 'Nama tidak boleh kosong',
             'email.required' => 'Email tidak boleh kosong',
             'password.required' => 'Password tidak boleh kosong',
             'password.min' => 'Password minimal 8 karakter',
-            'status_user.required' => 'Status Petugas tidak boleh kosong'
+            'status_user.required' => 'Status Petugas tidak boleh kosong',
+            'status_user.max' => 'Silahkan pilih status (RPL, TBSM, TKRO, Umum)'
         ]);
 
         $user = new User();
@@ -95,7 +96,7 @@ class KaryawanController extends Controller
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
         $user->status_user = $request->status_user;
-        $user->is_admin = 0; // Set is_admin to 0 for regular users
+        $user->is_admin = 0;
         $user->save();
 
         Alert::success('Berhasil!', 'Data Berhasil Ditambahkan');
@@ -132,21 +133,14 @@ class KaryawanController extends Controller
          $request->validate([
              'name' => 'required|string|max:255',
              'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-             'current_password' => 'required',
              'password' => 'nullable|string|min:6|confirmed',
          ],[
             'name.required' => 'Nama tidak boleh kosong',
             'email.required' => 'Email tidak boleh kosong',
             'password.required' => 'Password tidak boleh kosong',
-            'current_password.required' => 'Password lama tidak boleh kosong',
             'password.min' => 'Password minimal 6 karakter',
             'password.confirmed' => 'Konfirmasi password tidak sesuai',
          ]);
-     
-         // Cek apakah password lama benar
-         if (!Hash::check($request->current_password, $user->password)) {
-             return back()->withErrors(['current_password' => 'Password lama tidak sesuai.']);
-         }
      
          // Update data
          $user->name = $request->name;

@@ -60,7 +60,7 @@ class RuanganTableSeeder extends Seeder
         }
 
         // Ruang Umum
-        $umum = ['Ruang Guru', 'Ruang BK', 'Perpustakaan', 'UP RPL', 'UP TKRO', 'UP TBSM', 'Mushola', 'Ruangan Osis', 'Lab Informatika'];
+        $umum = ['Ruang Guru', 'Ruang BK', 'Perpustakaan', 'UP RPL', 'UP TKRO', 'UP TBSM', 'Mushola', 'Ruangan Osis', 'Lab Informatika', 'BLK', 'Gudang'];
         foreach ($umum as $nama) {
             $ruangan[] = [
                 'nama_ruangan' => $nama,

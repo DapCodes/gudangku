@@ -14,7 +14,7 @@ use Carbon\Carbon;
 Carbon::setLocale('id');
 
 
-class HomeController extends Controller
+class StatistikController extends Controller
 {
     public function __construct()
     {
@@ -120,7 +120,7 @@ class HomeController extends Controller
             'pinjamkembaliseries' => [$peminjaman, $pengembalian]
         ];
 
-        return view('home', compact(
+        return view('statistik', compact(
             'chartData',
             'barang',
             'peminjaman',

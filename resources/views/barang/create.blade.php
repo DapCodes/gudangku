@@ -72,16 +72,61 @@
                         $status = Auth::user()->status_user;
                     @endphp
                     @if ($status == 'RPL')
-                        <input type="text" name="status_barang" id="status_barang" value="RPL" hidden>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Status Barang</label>
+                        <div class="col-sm-10">
+                            <div class="input-group input-group-merge">
+                                <span id="basic-icon-default-company2" class="input-group-text"><i
+                                        class="bx bx-buildings"></i></span>
+                                <input name="status_barang" type="text" id="basic-icon-default-company" class="form-control"
+                                    placeholder="Samsung" aria-label="Samsung"
+                                    aria-describedby="basic-icon-default-company2" value="RPL" readonly/>
+                            </div>
+                        </div>
+                    </div>
                     @endif
                     @if ($status == 'TBSM')
-                        <input type="text" name="status_barang" id="status_barang" value="TBSM" hidden>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Status Barang</label>
+                        <div class="col-sm-10">
+                            <div class="input-group input-group-merge">
+                                <span id="basic-icon-default-company2" class="input-group-text"><i
+                                        class="bx bx-buildings"></i></span>
+                                <input name="status_barang" type="text" id="basic-icon-default-company" class="form-control"
+                                    placeholder="Samsung" aria-label="Samsung"
+                                    aria-describedby="basic-icon-default-company2" value="TBSM" readonly/>
+                            </div>
+                        </div>
+                    </div>
                     @endif
                     @if ($status == 'TKRO')
-                        <input type="text" name="status_barang" id="status_barang" value="TKRO" hidden>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Status Barang</label>
+                        <div class="col-sm-10">
+                            <div class="input-group input-group-merge">
+                                <span id="basic-icon-default-company2" class="input-group-text"><i
+                                        class="bx bx-buildings"></i></span>
+                                <input name="status_barang" type="text" id="basic-icon-default-company" class="form-control"
+                                    placeholder="Samsung" aria-label="Samsung"
+                                    aria-describedby="basic-icon-default-company2" value="TKRO" readonly/>
+                            </div>
+                        </div>
+                    </div>
                     @endif
                     @if ($status == 'Umum')
-                        <input type="text" name="status_barang" id="status_barang" value="Umum" hidden>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label" for="basic-icon-default-company">Status Barang</label>
+                        <div class="col-sm-10">
+                            <div class="input-group input-group-merge">
+                                <span id="basic-icon-default-company2" class="input-group-text"><i
+                                        class="bx bx-box"></i></span>
+                                <input name="status_barang" type="text" id="basic-icon-default-company" class="form-control bg-white"
+                                    placeholder="Samsung" aria-label="Samsung"
+                                    aria-describedby="basic-icon-default-company2" value="Umum" readonly/>
+                                
+                            </div>
+                        </div>
+                    </div>
                     @endif
                     @if ($status == 'admin')
                         <div class="row mb-3">

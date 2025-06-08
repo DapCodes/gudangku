@@ -71,7 +71,7 @@
                         <div class="col-sm-10">
                             <div class="input-group input-group-merge">
                                 <select name="status_user" id="status_user"
-                                    class="form-control @error('status_user') is-invalid @enderror">
+                                    class="form-control">
                                     <option>Pilih Status Petugas</option>
                                     <option value="Umum">Petugas Umum</option>
                                     <option value="RPL">Petugas RPL</option>

@@ -16,9 +16,14 @@ class BarangMasuks extends Model
         'tanggal_masuk',
         'keterangan',
         'ruangan_id',
+        'id_user',
     ];
 
     public $timestamps = true;
+
+    public function user() {
+        return $this->belongsTo(User::class,'id_user');
+    }
 
     public function ruangan()
     {

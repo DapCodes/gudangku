@@ -73,14 +73,17 @@ class BarangRuangansController extends Controller
         // Pagination dan view
         $barangRuangan = $barangRuanganQuery->paginate(10);
         $ruangan = Ruangans::whereHas('barangRuangan', function ($query) {
-        $query->where('stok', '>', 0);
+            $query->where('stok', '>', 0);
         })
-        ->where(function ($query) use ($user) {
-            $query->where('deskripsi', 'Umum')
+        ->when($user->status_user !== 'admin', function ($query) use ($user) {
+            $query->where(function ($q) use ($user) {
+                $q->where('deskripsi', 'Umum')
                 ->orWhere('deskripsi', $user->status_user);
+            });
         })
         ->orderBy('nama_ruangan')
         ->get();
+
 
 
 

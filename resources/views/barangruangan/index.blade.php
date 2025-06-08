@@ -4,39 +4,49 @@
 @section('content')
     @include('sweetalert::alert')
     <div class="card">
-        <div class="px-3 py-3 d-flex justify-content-between">
-            <div>
-                <form action="{{ route('brg-ruangan.index') }}" method="GET" class="d-flex justify-content-between gap-1">
+        <div class="p-3">
+    {{-- Tombol Ekspor --}}
+    <div class="mb-3 d-flex flex-wrap gap-2">
+        <form action="{{ route('brg-ruangan.index') }}" method="GET" class="d-flex flex-wrap gap-2">
+            <div class="d-flex flex-wrap gap-2">
+            <button type="submit" name="export" value="pdf" class="btn btn-danger">
+                <i class="bx bxs-file-pdf"></i> Ekspor PDF
+            </button>
 
-                    <button type="submit" name="export" class="btn btn-danger" value="pdf">
-                        <i class="bx bxs-file-pdf" style="position: relative; bottom: 2px;"></i>
-                        PDF
-                    </button>
+            <button type="submit" name="export" value="excel" class="btn btn-success">
+                <i class="bx bx-spreadsheet"></i> Ekspor Excel
+            </button>
+</div>
+    </div>
 
-
-                    <button type="submit" name="export" class="btn btn-success" value="excel">
-                        <i class="bx bx-spreadsheet" style="position: relative; bottom: 2px;"></i>
-                        EXCEL
-                    </button>
-
+    {{-- Form Filter dan Pencarian --}}
+    <div class="card p-3 shadow-sm">
+        <div class="row g-3">
+            {{-- Filter Ruangan --}}
+            <div class="col-md-4">
+                <label for="byClassSelect" class="form-label">Filter Berdasarkan Ruangan</label>
+                <select name="byClass" id="byClassSelect" class="form-select text-center">
+                    <option value="">Semua Ruangan</option>
+                    @foreach ($ruangan as $item)
+                        <option value="{{ $item->id }}" {{ isset($byClass) && $byClass == $item->id ? 'selected' : '' }}>
+                            {{ $item->nama_ruangan }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
 
-            <select name="byClass" id="byClassSelect" class="form-select w-25 text-center" aria-label="Filter Ruangan">
-                <option value="">Semua Ruangan</option>
-                @foreach ($ruangan as $item)
-                    <option value="{{ $item->id }}" {{ isset($byClass) && $byClass == $item->id ? 'selected' : '' }}>
-                        {{ $item->nama_ruangan }}
-                    </option>
-                @endforeach
-            </select>
-            <div class="d-flex align-items-center border-start ps-3 gap-1">
-                <i class="bx bx-search fs-4 lh-0 me-2"></i>
+            {{-- Kolom Pencarian --}}
+            <div class="col-md-4">
+                <label for="search" class="form-label">Pencarian</label>
+                <input type="text" name="search" class="form-control" placeholder="Nama barang..."
+                    value="{{ request('search') }}">
+            </div>
 
-
-                <input type="text" name="search" class="form-control border-0 shadow-none" placeholder="Cari..."
-                    aria-label="Cari..." value="{{ request('search') }}" />
-
-                <button class="btn btn-primary" type="submit">Cari</button>
+            {{-- Tombol Cari & Reset --}}
+            <div class="col-md-4 d-flex align-items-end gap-2">
+                <button class="btn btn-primary" type="submit">
+                    <i class="bx bx-search"></i> Cari
+                </button>
 
                 @if (
                     (request()->has('search') && request()->search != '') ||
@@ -44,12 +54,15 @@
                         request()->has('end_date') ||
                         request()->has('byClass'))
                     <a href="{{ route('brg-ruangan.index') }}" class="btn btn-secondary">
-                        <i class="bx bx-refresh"></i>
+                        <i class="bx bx-refresh"></i> Reset
                     </a>
                 @endif
-                </form>
             </div>
         </div>
+                </div>
+                </form>
+</div>
+
         <div class="table-responsive text-nowrap">
             <table class="table table-striped">
                 <thead>
@@ -66,7 +79,7 @@
                         <tr>
                             <td>{{ $loop->iteration + ($barangRuangan->firstItem() - 1) }}</td>
                             <td>{{ $item->ruangan->nama_ruangan }}</td>
-                            <td>{{ $item->barang->nama }}</td>
+                            <td>{{ $item->barang->nama }} - {{ $item->barang->merek }}</td>
                             <td>{{ $item->stok }}</td>
                             <td style="overflow: visible;">
                                 <div class="dropdown">

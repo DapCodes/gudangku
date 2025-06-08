@@ -16,9 +16,14 @@ class Barangs extends Model
         'foto',
         'stok',
         'status_barang',
+        'id_user',
     ];
 
     public $timestamps = true;
+
+    public function users() {
+        return $this->belongsTo(User::class,'id_user');
+    }
 
     public function barangmasuk()
     {
@@ -39,6 +44,10 @@ class Barangs extends Model
     public function barangruangan()
     {
         return $this->hasMany(BarangRuangans::class);
+    }
+
+    public function user() {
+        return $this->belongsTo(User::class,'id_user');
     }
 
     public function deleteImage(){

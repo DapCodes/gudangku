@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Http\Request;
 use App\Models\Barangs;
+use App\Models\Peminjamans;
 use RealRashid\SweetAlert\Facades\Alert;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\BarangExport;
@@ -34,19 +35,9 @@ class BarangController extends Controller
         $user = Auth::user();
         $keyword = $request->input('search');
         $exportType = $request->input('export');
-        $statusFilter = $request->input('status_barang'); // Tambahan filter status_barang
+        $statusFilter = $request->input('status_barang');
 
         $barangQuery = Barangs::query();
-
-        // Filter berdasarkan status_user jika bukan admin
-        if ($user->status_user !== 'admin') {
-            $barangQuery->where('status_barang', $user->status_user);
-        }
-
-        // Filter berdasarkan status_barang (dari tombol)
-        if ($statusFilter) {
-            $barangQuery->where('status_barang', $statusFilter);
-        }
 
         // Filter pencarian
         if ($keyword) {
@@ -55,12 +46,24 @@ class BarangController extends Controller
                     ->orWhere('merek', 'like', "%$keyword%")
                     ->orWhere('kode_barang', 'like', "%$keyword%")
                     ->orWhere('status_barang', 'like', "%$keyword%");
+            })->orWhereHas('user', function ($query) use ($keyword) {
+                $query->where('name', 'like', "%$keyword%");
             });
         }
 
-        // Ambil data untuk export
+        // Filter berdasarkan status_barang dari dropdown
+        if ($statusFilter) {
+            $barangQuery->where('status_barang', $statusFilter);
+        }
+
+        // Filter tambahan jika user bukan admin
+        if ($user->status_user !== 'admin') {
+            $barangQuery->where('status_barang', $user->status_user);
+        }
+
+        // Ekspor data
         if ($exportType) {
-            $barang = $barangQuery->get(); // Tidak paginate agar semua diekspor
+            $barang = $barangQuery->get();
 
             if ($exportType == 'excel') {
                 return Excel::download(new BarangExport($barang), 'laporan-data-barang.xlsx');
@@ -72,11 +75,13 @@ class BarangController extends Controller
             }
         }
 
-        // Ambil data barang dengan pagination
-        $barang = $barangQuery->orderBy('nama', 'asc')->paginate(10);
+        $barang = $barangQuery->orderBy('nama')->paginate(10);
+        $statusOptions = ['TBSM', 'RPL', 'TKRO', 'UMUM']; // Status yang tersedia
 
-        return view('barang.index', compact('barang', 'keyword', 'statusFilter'));
+        return view('barang.index', compact('barang', 'keyword', 'statusFilter', 'statusOptions'));
     }
+
+
 
 
     public function create()
@@ -102,11 +107,12 @@ class BarangController extends Controller
         $request->validate([
             'nama' => 'required',
             'merek' => 'required',
-            'foto' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'foto' => 'image|required|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ],
         [
             'nama.required' => 'Nama Barang tidak boleh kosong',
             'merek.required' => 'Merek Barang tidak boleh kosong',
+            'foto.required' => 'Gambar tidak boleh kosong.',
             'foto.image' => 'File yang diupload harus berupa gambar',
             'foto.mimes' => 'File yang diupload harus berupa jpeg, png, jpg, gif',
             'foto.max' => 'Ukuran file tidak boleh lebih dari 2MB',
@@ -131,6 +137,9 @@ class BarangController extends Controller
         }
 
         $barang->status_barang = $request->status_barang;
+
+        $userId = Auth::user();
+        $barang->id_user = $userId->id;
 
         $barang->save(); 
 
@@ -193,6 +202,8 @@ class BarangController extends Controller
         }
 
         $barang->status_barang = $request->status_barang;
+
+        $barang->id_user = $barang->id_user;        
         
         $barang->save(); 
 
@@ -203,6 +214,12 @@ class BarangController extends Controller
     public function destroy($id)
     {
         $barang = Barangs::findOrFail($id);
+        $pinjaman = Peminjamans::where('id_barang', $barang->id)->where('status', 'Sedang Dipinjam')->get();
+
+        if (count($pinjaman) > 0) {
+            Alert::warning('Gagal!', 'Data tidak dihapus. Karena beberapa stok sedang dipinjam!');
+            return redirect()->route('barang.index');
+        }
         
         if ($barang->foto && file_exists(public_path('image/barang/' . $barang->foto))) {
             unlink(public_path('image/barang/' . $barang->foto));

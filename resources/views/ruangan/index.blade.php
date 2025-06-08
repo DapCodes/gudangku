@@ -4,41 +4,73 @@
 @section('content')
     @include('sweetalert::alert')
     <div class="card">
-        <div class="px-3 py-3 d-flex justify-content-between">
-            <div>
-                <form action="{{ route('ruangan.index') }}" method="GET" class="d-flex justify-content-between gap-1">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahRuangan">
-                        <i class="bx bx-folder-plus" style="position: relative; bottom: 2px;"></i>
-                        Tambah
-                    </button>
+        <div class="p-3">
 
-                    <button type="submit" name="export" class="btn btn-danger" value="pdf">
-                        <i class="bx bxs-file-pdf" style="position: relative; bottom: 2px;"></i>
-                    </button>
+    {{-- Tombol Tambah & Ekspor --}}
+    <div class="mb-3 d-flex flex-wrap gap-2">
+        {{-- Tombol Tambah Ruangan (Trigger Modal) --}}
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahRuangan">
+            <i class="bx bx-folder-plus" style="position: relative; bottom: 2px;"></i> Tambah Ruangan
+        </button>
 
+        {{-- Form Ekspor PDF & Excel --}}
+        <form action="{{ route('ruangan.index') }}" method="GET" >
+            <div class="d-flex flex-wrap gap-2">
+            <input type="hidden" name="search" value="{{ request('search') }}">
+            <button type="submit" name="export" value="pdf" class="btn btn-danger">
+                <i class="bx bxs-file-pdf" style="position: relative; bottom: 2px;"></i> Ekspor PDF
+            </button>
+            <button type="submit" name="export" value="excel" class="btn btn-success">
+                <i class="bx bx-spreadsheet" style="position: relative; bottom: 2px;"></i> Ekspor Excel
+            </button>
+</div>
+    </div>
 
-                    <button type="submit" name="export" class="btn btn-success" value="excel">
-                        <i class="bx bx-spreadsheet" style="position: relative; bottom: 2px;"></i>
-                    </button>
+    {{-- Form Pencarian --}}
+    <div class="card p-3 shadow-sm mb-3">
+        <div class="row g-3 align-items-end">
 
+            {{-- Pencarian --}}
+            <div class="col-md-6 col-lg-4">
+                <label for="search" class="form-label">Pencarian</label>
+                <input type="text" name="search" id="search" class="form-control" placeholder="Nama ruangan..."
+                    value="{{ request('search') }}">
             </div>
 
-            <div class="d-flex align-items-center border-start ps-3 gap-1">
-                <i class="bx bx-search fs-4 lh-0 me-2"></i>
+            {{-- Tambahkan filter lainnya di sini jika diperlukan --}}
+            
+            <div class="col-md-6 col-lg-4">
+    <label for="status" class="form-label">Status Ruangan</label>
+    <select name="status" id="status" class="form-select">
+        <option value="">Semua Status</option>
+        <option value="RPL" {{ request('status') == 'RPL' ? 'selected' : '' }}>RPL</option>
+        <option value="TBSM" {{ request('status') == 'TBSM' ? 'selected' : '' }}>TBSM</option>
+        <option value="TKRO" {{ request('status') == 'TKRO' ? 'selected' : '' }}>TKRO</option>
+        <option value="Umum" {{ request('status') == 'Umum' ? 'selected' : '' }}>Umum</option>
+    </select>
+</div>
 
-                <input type="text" name="search" class="form-control border-0 shadow-none" placeholder="Cari..."
-                    aria-label="Cari..." value="{{ request('search') }}" />
+        
 
-                <button class="btn btn-primary" type="submit">Cari</button>
-
-                @if ((request()->has('search') && request()->search != '') || request()->has('start_date') || request()->has('end_date'))
+            {{-- Tombol Aksi --}}
+            <div class="col-md-6 col-lg-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bx bx-search"></i> Cari
+                </button>
+                @if (request()->filled('search'))
                     <a href="{{ route('ruangan.index') }}" class="btn btn-secondary">
-                        <i class="bx bx-refresh"></i>
+                        <i class="bx bx-refresh"></i> Reset
                     </a>
                 @endif
-                </form>
             </div>
+
         </div>
+        </div>
+
+    </form>
+</div>
+
+
         <div class="table-responsive text-nowrap">
             <table class="table table-striped">
                 <thead>

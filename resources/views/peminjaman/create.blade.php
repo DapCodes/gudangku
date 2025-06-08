@@ -139,26 +139,36 @@
     </div>
 
 
-    {{-- SCRIPT BARANG DINAMIS --}}
-    <script>
-        document.getElementById('ruanganSelect').addEventListener('change', function() {
-            const ruanganId = this.value;
-            const barangList = document.getElementById('barangList');
-            barangList.innerHTML = '<li><span class="dropdown-item">Memuat data...</span></li>';
+<script>
+    document.getElementById('ruanganSelect').addEventListener('change', function () {
+        const ruanganId = this.value;
+        const barangList = document.getElementById('barangList');
+        const dropdownBtn = document.getElementById('dropdownBarang');
+        const inputIdBarang = document.getElementById('id_barang');
+        const barangTerpilih = document.getElementById('barangTerpilih');
 
-            fetch(`{{ url('admin/get-barang-by-ruangan') }}/${ruanganId}`)
-                .then(response => response.json())
-                .then(data => {
-                    barangList.innerHTML = '';
+        // Reset input barang ketika ruangan berubah
+        inputIdBarang.value = '';
+        barangTerpilih.innerText = '';
+        dropdownBtn.innerHTML = `<i class="bx bx-box" style="margin-right: 5px;"></i> Pilih Barang`;
 
-                    if (!data || data.length === 0) {
-                        barangList.innerHTML =
-                            '<li><span class="dropdown-item">Tidak ada barang di ruangan ini</span></li>';
-                        return;
-                    }
-                    data.forEach(item => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `
+        // Tampilkan pesan loading
+        barangList.innerHTML = '<li><span class="dropdown-item">Memuat data...</span></li>';
+
+        // Ambil barang berdasarkan ruangan via fetch
+        fetch(`{{ url('admin/get-barang-by-ruangan') }}/${ruanganId}`)
+            .then(response => response.json())
+            .then(data => {
+                barangList.innerHTML = '';
+
+                if (!data || data.length === 0) {
+                    barangList.innerHTML = '<li><span class="dropdown-item">Tidak ada barang di ruangan ini</span></li>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
                         <a class="dropdown-item d-flex align-items-start" href="#"
                             onclick="pilihBarang('${item.id}', '${item.nama}', '${item.merek}')">
                             <div>
@@ -168,19 +178,21 @@
                         </a>
                         <hr class="my-1">
                     `;
-                        barangList.appendChild(li);
-                    });
-                })
-                .catch(() => {
-                    barangList.innerHTML =
-                        '<li><span class="dropdown-item text-danger">Gagal mengambil data barang</span></li>';
+                    barangList.appendChild(li);
                 });
-        });
+            })
+            .catch(() => {
+                barangList.innerHTML =
+                    '<li><span class="dropdown-item text-danger">Gagal mengambil data barang</span></li>';
+            });
+    });
 
-        function pilihBarang(id, nama, merek) {
-            document.getElementById('id_barang').value = id;
-            document.getElementById('barangTerpilih').innerText = `Barang dipilih: ${nama} (${merek})`;
-        }
-    </script>
+    function pilihBarang(id, nama, merek) {
+        document.getElementById('id_barang').value = id;
+        document.getElementById('barangTerpilih').innerText = `Barang dipilih: ${nama} (${merek})`;
+        document.getElementById('dropdownBarang').innerHTML =
+            `<i class="bx bx-box" style="margin-right: 5px;"></i> ${nama} - ${merek}`;
+    }
+</script>
 
 @endsection

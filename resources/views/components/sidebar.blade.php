@@ -1,6 +1,6 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo mb-2 mt-2" style="position: relative; right: 10px;">
-        <a href="index.html" class="app-brand-link">
+        <a href="{{ route('admin.home') }}" class="app-brand-link">
             <img style="width: 200px" src="{{ asset('admin/assets/img/icons/brands/gudangku-icon.png') }}" alt="">
         </a>
 
@@ -15,13 +15,19 @@
         <!-- Dashboard -->
         <li class="menu-item {{ Request::is('admin/home*') ? 'active' : '' }}">
             <a href="{{ route('admin.home') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-home"></i>
+                <div>Home</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Request::is('admin/statistik*') ? 'active' : '' }}">
+            <a href="{{ route('admin.statistik') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-grid-alt"></i>
-                <div>Dasbor</div>
+                <div>Statistik</div>
             </a>
         </li>
 
         <!-- Header -->
-        <li class="menu-header small text-uppercase mb-3">
+        <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Mengelola</span>
         </li>
 

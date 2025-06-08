@@ -50,10 +50,14 @@ class PeminjamanController extends Controller
             $query->where(function ($q) use ($keyword) {
                 $q->whereHas('barang', function ($q2) use ($keyword) {
                     $q2->where('nama', 'like', "%$keyword%")
-                       ->orWhere('merek', 'like', "%$keyword%");
+                       ->orWhere('merek', 'like', "%$keyword%")
+                       ->orWhere('status_barang', 'like', "%$keyword%");
                 })
                 ->orWhereHas('ruangan', function ($q2) use ($keyword) {
                     $q2->where('nama_ruangan', 'like', "%$keyword%");
+                })
+                ->orWhereHas('user', function ($q2) use ($keyword) {
+                    $q2->where('name', 'like', "%$keyword%");
                 });
             });
         })
@@ -103,7 +107,7 @@ class PeminjamanController extends Controller
         }
 
         // Jika tidak export, lakukan pagination dan tambahkan tenggat pada data yang ditampilkan
-        $peminjaman = $query->paginate(10)->withQueryString();
+        $peminjaman = $query->orderBy('id', 'desc')->paginate(10);
 
         // Menambahkan 'tenggat' di sini sebelum ditampilkan di view
         $peminjaman->getCollection()->transform(function ($item) {
@@ -216,6 +220,8 @@ class PeminjamanController extends Controller
         $peminjaman->id_barang = $request->id_barang;
         $peminjaman->status = "Sedang Dipinjam";
         $peminjaman->ruangan_id = $request->deskripsi;
+        $userId = Auth::user();
+        $peminjaman->id_user = $userId->id;
 
         $barang = Barangs::findOrFail($request->id_barang);
         if ($barang->stok < $request->jumlah) {
@@ -255,22 +261,33 @@ class PeminjamanController extends Controller
         $user = Auth::user();
         $peminjaman = Peminjamans::findOrFail($id);
 
-        // Ambil ID ruangan yang memiliki barang
-        $ruanganIdsWithBarang = BarangRuangans::distinct()->pluck('ruangan_id');
-
-        // Ambil data barang
+        // Ambil barang sesuai status user
         if ($user->status_user === 'admin') {
             $barang = Barangs::all();
-            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)->get();
         } else {
             $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])->get();
-            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)
-                        ->where('deskripsi', $user->status_user)
-                        ->get();
         }
+
+        // Ambil ID barang yang sesuai
+        $barangIds = $barang->pluck('id');
+
+        // Ambil ID ruangan yang memiliki barang-barang tersebut
+        $ruanganIdsWithBarang = BarangRuangans::whereIn('barang_id', $barangIds)
+                                ->distinct()
+                                ->pluck('ruangan_id');
+
+        // Ambil data ruangan yang memiliki barang sesuai status user
+        $ruanganQuery = Ruangans::whereIn('id', $ruanganIdsWithBarang);
+        
+        if ($user->status_user !== 'admin') {
+            $ruanganQuery->where('deskripsi', $user->status_user);
+        }
+
+        $ruangan = $ruanganQuery->get();
 
         return view('peminjaman.edit', compact('peminjaman', 'barang', 'ruangan'));
     }
+
 
     
 
@@ -293,6 +310,7 @@ class PeminjamanController extends Controller
             'status' => 'required|in:Sedang Dipinjam,Sudah Dikembalikan'
         ], [
             'jumlah.required' => 'Jumlah tidak boleh kosong',
+            'jumlah.min' => 'Jumlah barang minimal 1',
             'tanggal_pinjam.required' => 'Tanggal pinjam tidak boleh kosong',
             'tanggal_kembali.required' => 'Tanggal kembali tidak boleh kosong',
             'tanggal_kembali.after_or_equal' => 'Tanggal kembali harus setelah atau sama dengan tanggal pinjam',
@@ -342,6 +360,8 @@ class PeminjamanController extends Controller
             $pengembalian->id_peminjam = $peminjaman->id;
             $pengembalian->id_barang = $peminjaman->id_barang;
             $pengembalian->ruangan_id = $request->ruangan_id; // Diperbaiki dari 'deskripsi'
+            $userId = Auth::user();
+            $pengembalian->id_user = $userId->id;
             $pengembalian->save();
 
             $peminjaman->status = 'Sudah Dikembalikan';
@@ -354,28 +374,31 @@ class PeminjamanController extends Controller
         // === Jika status masih "Sedang Dipinjam" ===
         if ($request->status == "Sedang Dipinjam") {
             $jumlahBaru = $request->jumlah;
+            $jumlahLama = $peminjaman->jumlah;
 
-            // Validasi stok
-            if ($barangBaru->stok < $jumlahBaru) {
+            // Validasi stok cukup
+            if ($barangBaru->stok + $jumlahLama < $jumlahBaru) {
                 Alert::warning('Warning', 'Stok barang utama tidak cukup')->autoClose(1500);
                 return redirect()->back();
             }
 
-            if (!$barangRuanganBaru || $barangRuanganBaru->stok < $jumlahBaru) {
+            if ($barangRuanganBaru->stok + $jumlahLama < $jumlahBaru) {
                 Alert::warning('Warning', 'Stok barang di ruangan tidak cukup')->autoClose(1500);
                 return redirect()->back();
             }
 
             // Barang/ruangan berubah
             if ($peminjaman->id_barang != $request->id_barang || $peminjaman->ruangan_id != $request->ruangan_id) {
-                $barangLama->stok += $peminjaman->jumlah;
+                // Kembalikan stok lama
+                $barangLama->stok += $jumlahLama;
                 $barangLama->save();
 
                 if ($barangRuanganLama) {
-                    $barangRuanganLama->stok += $peminjaman->jumlah;
+                    $barangRuanganLama->stok += $jumlahLama;
                     $barangRuanganLama->save();
                 }
 
+                // Kurangi stok baru
                 $barangBaru->stok -= $jumlahBaru;
                 $barangBaru->save();
 
@@ -383,44 +406,65 @@ class PeminjamanController extends Controller
                 $barangRuanganBaru->save();
             } else {
                 // Barang & ruangan sama
-                $selisih = $jumlahBaru - $peminjaman->jumlah;
+                $selisih = $jumlahBaru - $jumlahLama;
 
-                if ($selisih != 0) {
-                    if ($selisih > 0) {
-                        if ($barangBaru->stok < $selisih || $barangRuanganBaru->stok < $selisih) {
-                            Alert::warning('Warning', 'Stok tambahan tidak mencukupi')->autoClose(1500);
-                            return redirect()->back();
-                        }
-
-                        $barangBaru->stok -= $selisih;
-                        $barangBaru->save();
-
-                        $barangRuanganBaru->stok -= $selisih;
-                        $barangRuanganBaru->save();
-                    } else {
-                        $barangBaru->stok += abs($selisih);
-                        $barangBaru->save();
-
-                        $barangRuanganBaru->stok += abs($selisih);
-                        $barangRuanganBaru->save();
+                if ($selisih > 0) {
+                    // Tambah pinjaman => kurangi stok
+                    if ($barangBaru->stok < $selisih || $barangRuanganBaru->stok < $selisih) {
+                        Alert::warning('Warning', 'Stok tambahan tidak mencukupi')->autoClose(1500);
+                        return redirect()->back();
                     }
+
+                    $barangBaru->stok -= $selisih;
+                    $barangBaru->save();
+
+                    $barangRuanganBaru->stok -= $selisih;
+                    $barangRuanganBaru->save();
+                } elseif ($selisih < 0) {
+                    // Pengembalian sebagian
+                    $jumlahDikembalikan = abs($selisih);
+
+                    $barangBaru->stok += $jumlahDikembalikan;
+                    $barangBaru->save();
+
+                    $barangRuanganBaru->stok += $jumlahDikembalikan;
+                    $barangRuanganBaru->save();
+
+                    // Catat pengembalian sebagian
+                    $lastRecord = Pengembalians::latest('id')->first();
+                    $lastId = $lastRecord ? $lastRecord->id : 0;
+                    $kodeBarang = 'BB-' . str_pad($lastId + 1, 4, '0', STR_PAD_LEFT);
+
+                    $pengembalian = new Pengembalians();
+                    $pengembalian->kode_barang = $kodeBarang;
+                    $pengembalian->jumlah = $jumlahDikembalikan;
+                    $pengembalian->tanggal_kembali = $request->tanggal_kembali;
+                    $pengembalian->nama_peminjam = $peminjaman->nama_peminjam;
+                    $pengembalian->status = 'Sedang Dipinjam'; // tetap
+                    $pengembalian->id_peminjam = $peminjaman->id;
+                    $pengembalian->id_barang = $peminjaman->id_barang;
+                    $pengembalian->ruangan_id = $request->ruangan_id;
+                    $userId = Auth::user();
+                    $pengembalian->id_user = $userId->id;
+                    $pengembalian->save();
                 }
             }
 
-            // Simpan perubahan
+            // Simpan perubahan data peminjaman
             $peminjaman->update([
                 'id_barang' => $request->id_barang,
                 'jumlah' => $request->jumlah,
                 'tanggal_pinjam' => $request->tanggal_pinjam,
                 'tanggal_kembali' => $request->tanggal_kembali,
-                'status' => $request->status,
+                'status' => $request->status, // Tetap "Sedang Dipinjam"
                 'nama_peminjam' => $request->nama_peminjam,
-                'ruangan_id' => $request->ruangan_id, // Diperbaiki dari 'deskripsi'
+                'ruangan_id' => $request->ruangan_id,
             ]);
 
             Alert::success('Success', 'Data Berhasil Diubah')->autoClose(1500);
             return redirect()->route('peminjaman.index');
         }
+
     }
 
 

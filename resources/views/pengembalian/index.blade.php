@@ -4,46 +4,59 @@
 @section('content')
     @include('sweetalert::alert')
     <div class="card">
-        <div class="px-3 py-3 d-flex justify-content-between">
-            <div>
-                <form action="{{ route('pengembalian.index') }}" method="GET" class="d-flex justify-content-between gap-1">
+        <div class="p-3">
+    {{-- Tombol Ekspor --}}
+    <div class="mb-3 d-flex flex-wrap gap-2">
+        <form action="{{ route('pengembalian.index') }}" method="GET">
+            <div class="d-flex flex-wrap gap-2">
+            <button type="submit" name="export" value="pdf" class="btn btn-danger">
+                <i class="bx bxs-file-pdf"></i> Ekspor PDF
+            </button>
 
-                    <button type="submit" name="export" class="btn btn-danger" value="pdf">
-                        <i class="bx bxs-file-pdf" style="position: relative; bottom: 2px;"></i>
-                        PDF
-                    </button>
+            <button type="submit" name="export" value="excel" class="btn btn-success">
+                <i class="bx bx-spreadsheet"></i> Ekspor Excel
+            </button>
+</div>
+    </div>
 
-
-                    <button type="submit" name="export" class="btn btn-success" value="excel">
-                        <i class="bx bx-spreadsheet" style="position: relative; bottom: 2px;"></i>
-                        EXCEL
-                    </button>
-
+    {{-- Form Pencarian dan Filter Tanggal --}}
+    <div class="card p-3 shadow-sm">
+        <div class="row g-3">
+            {{-- Kolom Pencarian --}}
+            <div class="col-md-6">
+                <label for="search" class="form-label">Cari Data</label>
+                <input type="text" name="search" class="form-control"
+                    placeholder="Nama peminjam, barang..." value="{{ request('search') }}">
             </div>
 
-            <div class="d-flex align-items-center border-start ps-3 gap-1">
-                <i class="bx bx-search fs-4 lh-0 me-2"></i>
+            {{-- Filter Tanggal --}}
+            <div class="col-md-3">
+                <label for="start_date" class="form-label">Dari Tanggal</label>
+                <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
+            </div>
 
-                <input type="text" name="search" class="form-control border-0 border-bottom shadow-none"
-                    placeholder="Cari..." aria-label="Cari..." value="{{ request('search') }}" />
-
-                <!-- Tambahkan filter tanggal -->
-                <input type="date" name="start_date" class="form-control border-0 shadow-none"
-                    value="{{ request('start_date') }}" />
-                <span class="mx-1"> - </span>
-                <input type="date" name="end_date" class="form-control border-0 shadow-none"
-                    value="{{ request('end_date') }}" />
-
-                <button class="btn btn-primary" type="submit">Cari</button>
-
-                @if ((request()->has('search') && request()->search != '') || request()->has('start_date') || request()->has('end_date'))
-                    <a href="{{ route('pengembalian.index') }}" class="btn btn-secondary">
-                        <i class="bx bx-refresh"></i>
-                    </a>
-                @endif
-                </form>
+            <div class="col-md-3">
+                <label for="end_date" class="form-label">Sampai Tanggal</label>
+                <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
             </div>
         </div>
+
+        {{-- Tombol Aksi --}}
+        <div class="mt-3 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">
+                <i class="bx bx-search"></i> Cari
+            </button>
+
+            @if ((request()->has('search') && request()->search != '') || request()->has('start_date') || request()->has('end_date'))
+                <a href="{{ route('pengembalian.index') }}" class="btn btn-secondary">
+                    <i class="bx bx-refresh"></i> Reset
+                </a>
+            @endif
+        </div>
+</div>
+    </form>
+</div>
+
         <div class="table-responsive text-nowrap">
             <table class="table table-striped">
                 <thead>
@@ -58,6 +71,7 @@
                         <th>Nama Peminjam</th>
                         <th>Ruangan</th>
                         <th>Status</th>
+                        <th>Kreator</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -77,6 +91,7 @@
                                 class="{{ $item->status == 'Sedang Dipinjam' ? 'text-danger' : ($item->status == 'Sudah Dikembalikan' ? 'text-success' : '') }}">
                                 {{ $item->status }}
                             </td>
+                            <td>{{ $item->user->name }}</td>
                             <td style="overflow: visible;">
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
