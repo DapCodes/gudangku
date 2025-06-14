@@ -87,7 +87,7 @@
                             <td>{{ \Carbon\Carbon::parse($item->tanggal_keluar)->translatedFormat('l, d F Y') }}</td>
                             <td>{{ $item->ruangan->nama_ruangan }}</td>
                             <td>{{ Str::limit($item->keterangan, 20) }}</td>
-                            <td>{{ $data->user->name }}</td>
+                            <td>{{ $item->user->name }}</td>
                             <td style="overflow: visible;">
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow"

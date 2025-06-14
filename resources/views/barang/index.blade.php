@@ -3,6 +3,8 @@
 
 @section('content')
     @include('sweetalert::alert')
+
+
     <div class="card mb-5">
        <div class="p-3">
 

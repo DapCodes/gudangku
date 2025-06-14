@@ -115,6 +115,7 @@
                                     </button>
                                     <div class="dropdown-menu">
                                         <!-- Tombol Detail -->
+                                         
                                         <a class="dropdown-item" href="{{ route('peminjaman.show', $item->id) }}">
                                             <i class="bx bx-show-alt me-1"></i> Detail
                                         </a>

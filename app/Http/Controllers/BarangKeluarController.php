@@ -23,61 +23,83 @@ class BarangKeluarController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        
+
         $keyword = $request->input('search');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $exportType = $request->input('export');
 
-        $query = BarangKeluars::with(['barang', 'ruangan'])
-        ->when($keyword, function ($query) use ($keyword) {
-            $query->whereHas('barang', function ($q) use ($keyword) {
-                $q->where('nama', 'like', "%$keyword%")
-                  ->orWhere('merek', 'like', "%$keyword%")
-                  ->orWhere('status_barang', 'like', "%$keyword%");
+        $query = BarangKeluars::with(['barang', 'ruangan', 'user'])
+            ->when($keyword, function ($query) use ($keyword) {
+                $query->where(function ($subQuery) use ($keyword) {
+                    $subQuery->whereHas('barang', function ($q) use ($keyword) {
+                        $q->where('nama', 'like', "%$keyword%")
+                        ->orWhere('merek', 'like', "%$keyword%")
+                        ->orWhere('status_barang', 'like', "%$keyword%");
+                    })
+                    ->orWhereHas('ruangan', function ($q) use ($keyword) {
+                        $q->where('nama_ruangan', 'like', "%$keyword%");
+                    })
+                    ->orWhereHas('user', function ($q) use ($keyword) {
+                        $q->where('name', 'like', "%$keyword%");
+                    });
+                });
             })
-            ->orWhereHas('ruangan', function ($q) use ($keyword) {
-                $q->where('nama_ruangan', 'like', "%$keyword%");
+            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('tanggal_keluar', [$startDate, $endDate]);
             })
-            ->orWhereHas('user', function ($query) use ($keyword) {
-                $query->where('name', 'like', "%$keyword%");
+            ->when($startDate && !$endDate, function ($query) use ($startDate) {
+                $query->whereDate('tanggal_keluar', '>=', $startDate);
+            })
+            ->when(!$startDate && $endDate, function ($query) use ($endDate) {
+                $query->whereDate('tanggal_keluar', '<=', $endDate);
             });
-        })
-        ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-            $query->whereBetween('tanggal_keluar', [$startDate, $endDate]);
-        })
-        ->when($startDate && !$endDate, function ($query) use ($startDate) {
-            $query->whereDate('tanggal_keluar', '>=', $startDate);
-        })
-        ->when(!$startDate && $endDate, function ($query) use ($endDate) {
-            $query->whereDate('tanggal_keluar', '<=', $endDate);
-        })
-        ->when($user->status_user !== 'admin', function ($query) use ($user) {
+
+        // Filter berdasarkan role user
+        if ($user->status_user === 'Umum') {
+            $query->whereHas('barang', function ($q) {
+                $q->where('status_barang', 'Umum');
+            });
+
             $query->whereHas('ruangan', function ($q) use ($user) {
-                $q->where(function ($q2) use ($user) {
-                    $q2->Where('deskripsi', $user->status_user);
+                $q->whereIn('id', function ($subQuery) {
+                    $subQuery->select('ruangan_id')
+                        ->from('barang_ruangans')
+                        ->whereIn('barang_id', function ($subSubQuery) {
+                            $subSubQuery->select('id')
+                                ->from('barangs')
+                                ->where('status_barang', 'Umum');
+                        });
                 });
             });
-        });
+
+        } elseif ($user->status_user !== 'admin') {
+            $query->whereHas('ruangan', function ($q) use ($user) {
+                $q->where('deskripsi', $user->status_user);
+            });
+        }
+
+        // Ekspor jika diminta
         $barangKeluar = $query->get();
 
-        // Export jika ada request
-        if ($exportType == 'excel') {
+        if ($exportType === 'excel') {
             return \Maatwebsite\Excel\Facades\Excel::download(
                 new \App\Exports\BarangKeluarExport($barangKeluar),
                 'laporan-data-barangkeluar.xlsx'
             );
         }
 
-        if ($exportType == 'pdf') {
+        if ($exportType === 'pdf') {
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.barangKeluar', ['barangKeluar' => $barangKeluar]);
             return $pdf->download('laporan-data-barangkeluar.pdf');
         }
 
+        // Paginate hasil akhir
         $barangKeluar = $query->paginate(10)->withQueryString();
 
         return view('barangkeluar.index', compact('barangKeluar', 'keyword', 'startDate', 'endDate'));
     }
+
 
 
     
@@ -93,17 +115,33 @@ class BarangKeluarController extends Controller
         $user = Auth::user();
 
         if ($user->status_user === 'admin') {
+            // Admin bisa lihat semua barang
             $barang = Barangs::all();
-        } else {
-            $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])->get();
-        }
 
-        // Ambil ID ruangan yang memiliki barang
-        $ruanganIdsWithBarang = BarangRuangans::distinct()->pluck('ruangan_id');
-
-        if ($user->status_user === 'admin') {
+            // Ambil semua ruangan yang punya barang apapun
+            $ruanganIdsWithBarang = BarangRuangans::distinct()->pluck('ruangan_id');
             $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)->get();
+
+        } elseif ($user->status_user === 'Umum') {
+            // Umum hanya bisa lihat barang dengan status umum
+            $barang = Barangs::where('status_barang', 'Umum')->get();
+
+            // Ambil ID barang dengan status umum
+            $barangIdsUmum = Barangs::where('status_barang', 'Umum')->pluck('id');
+
+            // Ambil ID ruangan yang punya barang status umum
+            $ruanganIdsWithBarangUmum = BarangRuangans::whereIn('barang_id', $barangIdsUmum)
+                ->distinct()
+                ->pluck('ruangan_id');
+
+            // Ambil data ruangan yang memiliki barang umum
+            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarangUmum)->get();
+
         } else {
+            // Untuk user selain admin dan umum
+            $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])->get();
+
+            $ruanganIdsWithBarang = BarangRuangans::distinct()->pluck('ruangan_id');
             $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)
                         ->where('deskripsi', $user->status_user)
                         ->get();
@@ -111,6 +149,7 @@ class BarangKeluarController extends Controller
 
         return view('barangkeluar.create', compact('barang', 'ruangan'));
     }
+
 
 
 
@@ -222,19 +261,41 @@ class BarangKeluarController extends Controller
         $barangKeluar = BarangKeluars::findOrFail($id);
 
         if ($user->status_user === 'admin') {
+            // Admin bebas akses semua barang dan ruangan
             $barang = Barangs::all();
             $ruangan = Ruangans::all();
+
+        } elseif ($user->status_user === 'umum') {
+            // Barang: hanya status umum
+            $barang = Barangs::where('status_barang', 'Umum')->get();
+
+            // Ambil ID barang umum
+            $barangIdsUmum = Barangs::where('status_barang', 'Umum')->pluck('id');
+
+            // Ambil ID ruangan yang memiliki barang umum
+            $ruanganIdsWithBarangUmum = BarangRuangans::whereIn('barang_id', $barangIdsUmum)
+                ->distinct()
+                ->pluck('ruangan_id');
+
+            // Ambil data ruangan yang sesuai
+            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarangUmum)->get();
+
         } else {
+            // User khusus: barang Umum + sesuai status
             $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])->get();
-            $ruangan = Ruangans::where('deskripsi', [$user->status_user])->get();
+
+            // Ruangan: deskripsi sesuai user
+            $ruangan = Ruangans::where('deskripsi', $user->status_user)->get();
         }
 
+        // Cek keterkaitan barang & ruangan untuk data yang akan diedit
         $barangRuangan = BarangRuangans::where('barang_id', $barangKeluar->id_barang)
             ->where('ruangan_id', $barangKeluar->ruangan_id)
             ->first();
 
         return view('barangkeluar.edit', compact('barang', 'ruangan', 'barangKeluar', 'barangRuangan'));
     }
+
 
 
     

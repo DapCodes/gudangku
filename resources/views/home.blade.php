@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('page-title', 'Dasbor')
+@section('page-title', 'Beranda')
 
 @section('content')
     <div class="row mb-4">

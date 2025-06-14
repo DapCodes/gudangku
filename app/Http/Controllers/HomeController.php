@@ -29,9 +29,16 @@ class HomeController extends Controller
         $satuBulanLalu = Carbon::now()->subDays(7);
 
         if ($isAdmin) {
-            $barang = Barangs::count();
+            // Barang yang dibuat dalam 7 hari terakhir
+            $barang = Barangs::where('created_at', '>=', $satuBulanLalu)->count();
+            $barangStok = Barangs::where('created_at', '>=', $satuBulanLalu)->sum('stok');
         } else {
-            $barang = Barangs::where('status_barang', $user->status_user)->count();
+            $barang = Barangs::where('status_barang', $user->status_user)
+                ->where('created_at', '>=', $satuBulanLalu)
+                ->count();
+            $barangStok = Barangs::where('status_barang', $user->status_user)
+                ->where('created_at', '>=', $satuBulanLalu)
+                ->sum('stok');
         }
 
         $peminjaman = Peminjamans::where('tanggal_pinjam', '>=', $satuBulanLalu)
@@ -123,6 +130,7 @@ class HomeController extends Controller
         return view('home', compact(
             'chartData',
             'barang',
+            'barangStok',
             'peminjaman',
             'peminjamanStok',
             'pengembalian',

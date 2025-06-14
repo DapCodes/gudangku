@@ -183,3 +183,36 @@
     opacity: 0;
   }
 }
+
+
+.scrollable-list {
+  max-height: 420px;
+  overflow-y: auto;
+  overflow-y: hidden;
+}
+
+.scrollable-list:hover {
+  overflow-y: auto;
+}
+
+/* Untuk Chrome, Edge, dan Safari */
+.scrollable-list::-webkit-scrollbar {
+  width: 5px;
+  /* Lebar scrollbar */
+}
+
+.scrollable-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  /* Warna thumb */
+  border-radius: 10px;
+}
+
+/* Untuk Firefox */
+.scrollable-list {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}

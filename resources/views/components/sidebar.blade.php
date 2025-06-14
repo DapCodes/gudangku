@@ -16,7 +16,7 @@
         <li class="menu-item {{ Request::is('admin/home*') ? 'active' : '' }}">
             <a href="{{ route('admin.home') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home"></i>
-                <div>Home</div>
+                <div>Beranda</div>
             </a>
         </li>
         <li class="menu-item {{ Request::is('admin/statistik*') ? 'active' : '' }}">

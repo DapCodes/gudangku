@@ -42,7 +42,7 @@
             <div class="col-md-6 col-lg-4">
     <label for="status" class="form-label">Status Ruangan</label>
     <select name="status" id="status" class="form-select">
-        <option value="">Semua Status</option>
+        <option value="">Semua Jurusan</option>
         <option value="RPL" {{ request('status') == 'RPL' ? 'selected' : '' }}>RPL</option>
         <option value="TBSM" {{ request('status') == 'TBSM' ? 'selected' : '' }}>TBSM</option>
         <option value="TKRO" {{ request('status') == 'TKRO' ? 'selected' : '' }}>TKRO</option>

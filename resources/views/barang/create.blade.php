@@ -78,7 +78,7 @@
                             <div class="input-group input-group-merge">
                                 <span id="basic-icon-default-company2" class="input-group-text"><i
                                         class="bx bx-buildings"></i></span>
-                                <input name="status_barang" type="text" id="basic-icon-default-company" class="form-control"
+                                <input name="status_barang" type="text" id="basic-icon-default-company" class="form-control bg-white"
                                     placeholder="Samsung" aria-label="Samsung"
                                     aria-describedby="basic-icon-default-company2" value="RPL" readonly/>
                             </div>
@@ -92,7 +92,7 @@
                             <div class="input-group input-group-merge">
                                 <span id="basic-icon-default-company2" class="input-group-text"><i
                                         class="bx bx-buildings"></i></span>
-                                <input name="status_barang" type="text" id="basic-icon-default-company" class="form-control"
+                                <input name="status_barang" type="text" id="basic-icon-default-company" class="form-control bg-white"
                                     placeholder="Samsung" aria-label="Samsung"
                                     aria-describedby="basic-icon-default-company2" value="TBSM" readonly/>
                             </div>
@@ -106,7 +106,7 @@
                             <div class="input-group input-group-merge">
                                 <span id="basic-icon-default-company2" class="input-group-text"><i
                                         class="bx bx-buildings"></i></span>
-                                <input name="status_barang" type="text" id="basic-icon-default-company" class="form-control"
+                                <input name="status_barang" type="text" id="basic-icon-default-company" class="form-control bg-white"
                                     placeholder="Samsung" aria-label="Samsung"
                                     aria-describedby="basic-icon-default-company2" value="TKRO" readonly/>
                             </div>

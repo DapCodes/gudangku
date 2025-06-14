@@ -118,8 +118,7 @@
                             <div class="input-group input-group-merge">
                                 <span id="basic-icon-default-company2" class="input-group-text"><i
                                         class="bx bx-note"></i></span>
-                                <input name="keterangan" type="text" class="form-control"
-                                    placeholder="Barang dalam keadaan baik" value="{{ $barangMasuk->keterangan }}" />
+                                <textarea name="keterangan" type="text" class="form-control">{{$barangMasuk->keterangan}}</textarea>
                             </div>
                             @error('keterangan')
                                 <div class="invalid-feedback d-block mt-1 d-flex gap-1" style="margin-left: 15px;">

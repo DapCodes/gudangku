@@ -31,19 +31,22 @@ class BarangMasukController extends Controller
         $keyword = $request->input('search');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
+        $exportType = $request->input('export');
 
-        $query = BarangMasuks::with('barang')
+        $query = BarangMasuks::with(['barang', 'ruangan', 'user'])
             ->when($keyword, function ($query) use ($keyword) {
-                $query->whereHas('barang', function ($q) use ($keyword) {
-                    $q->where('nama', 'like', "%$keyword%")
-                    ->orWhere('merek', 'like', "%$keyword%")
-                    ->orWhere('status_barang', 'like', "%$keyword%");
-                })
-                ->orWhereHas('ruangan', function ($q) use ($keyword) {
-                    $q->where('nama_ruangan', 'like', "%$keyword%");
-                })
-                ->orWhereHas('user', function ($query) use ($keyword) {
-                    $query->where('name', 'like', "%$keyword%");
+                $query->where(function ($subQuery) use ($keyword) {
+                    $subQuery->whereHas('barang', function ($q) use ($keyword) {
+                        $q->where('nama', 'like', "%$keyword%")
+                        ->orWhere('merek', 'like', "%$keyword%")
+                        ->orWhere('status_barang', 'like', "%$keyword%");
+                    })
+                    ->orWhereHas('ruangan', function ($q) use ($keyword) {
+                        $q->where('nama_ruangan', 'like', "%$keyword%");
+                    })
+                    ->orWhereHas('user', function ($q) use ($keyword) {
+                        $q->where('name', 'like', "%$keyword%");
+                    });
                 });
             })
             ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
@@ -54,30 +57,49 @@ class BarangMasukController extends Controller
             })
             ->when(!$startDate && $endDate, function ($query) use ($endDate) {
                 $query->whereDate('tanggal_masuk', '<=', $endDate);
-            })
-            ->when($user->status_user !== 'admin', function ($query) use ($user) {
-                $query->whereHas('ruangan', function ($q) use ($user) {
-                    $q->where(function ($q2) use ($user) {
-                        $q2->Where('deskripsi', $user->status_user);
-                    });
+            });
+
+        // 🔐 Filter berdasarkan role user
+        if ($user->status_user === 'Umum') {
+            // Hanya barang yang statusnya Umum
+            $query->whereHas('barang', function ($q) {
+                $q->where('status_barang', 'Umum');
+            });
+
+            // Hanya ruangan yang berisi barang status Umum
+            $query->whereHas('ruangan', function ($q) {
+                $q->whereIn('id', function ($subQuery) {
+                    $subQuery->select('ruangan_id')
+                        ->from('barang_ruangans')
+                        ->whereIn('barang_id', function ($subSubQuery) {
+                            $subSubQuery->select('id')
+                                ->from('barangs')
+                                ->where('status_barang', 'Umum');
+                        });
                 });
             });
 
-
-        // Untuk export, ambil semua data
-        $barangMasukForExport = $query->get();
-
-        if ($request->has('export')) {
-            if ($request->export == 'excel') {
-                return Excel::download(new BarangMasukExport($barangMasukForExport), 'laporan-data-barangMasuk.xlsx');
-            } elseif ($request->export == 'pdf') {
-                $pdf = Pdf::loadView('pdf.barangMasuk', ['barangMasuk' => $barangMasukForExport]);
-                return $pdf->download('laporan-data-barangMasuk.pdf');
-            }
+        } elseif ($user->status_user !== 'admin') {
+            // Untuk user lain yang bukan admin atau umum
+            $query->whereHas('ruangan', function ($q) use ($user) {
+                $q->where('deskripsi', $user->status_user);
+            });
         }
 
-        // Jika tidak export, tampilkan dengan paginate
-        $barangMasuk = $query->orderBy('id', 'desc')->paginate(10);
+        // 🔄 Export jika diminta
+        $barangMasukForExport = $query->get();
+
+        if ($exportType === 'excel') {
+            return Excel::download(new BarangMasukExport($barangMasukForExport), 'laporan-data-barangMasuk.xlsx');
+        }
+
+        if ($exportType === 'pdf') {
+            $pdf = Pdf::loadView('pdf.barangMasuk', ['barangMasuk' => $barangMasukForExport]);
+            return $pdf->download('laporan-data-barangMasuk.pdf');
+        }
+
+        // 📄 Paginate jika bukan export
+        $barangMasuk = $query->orderBy('id', 'desc')->paginate(10)->withQueryString();
 
         return view('barangmasuk.index', compact('barangMasuk', 'keyword', 'startDate', 'endDate'));
     }
@@ -101,11 +123,15 @@ class BarangMasukController extends Controller
         if ($user->status_user === 'admin') {
             $barang = Barangs::all();
         } else {
-            $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])->get();
+            $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])
+            ->orderBy('status_barang', 'asc')
+            ->get();
         }
 
         // Ambil data ruangan
         if ($user->status_user === 'admin') {
+            $ruangan = Ruangans::all();
+        } elseif ($user->status_user === 'Umum') {
             $ruangan = Ruangans::all();
         } else {
             $ruangan = Ruangans::where('deskripsi', $user->status_user)->get();
@@ -212,17 +238,18 @@ class BarangMasukController extends Controller
         $user = Auth::user();
         $barangMasuk = BarangMasuks::findOrFail($id);
 
-        // Barang: tampilkan jika status_barang = 'Umum' ATAU status_barang = status_user
-        $barang = Barangs::where(function ($query) use ($user) {
-            $query->where('status_barang', 'Umum')
-                ->orWhere('status_barang', $user->status_user);
-        })->get();
-
-        
-        // Ambil data ruangan
+        // Jika admin, tampilkan semua barang
         if ($user->status_user === 'admin') {
+            $barang = Barangs::all();
             $ruangan = Ruangans::all();
         } else {
+            // Jika bukan admin, tampilkan barang dengan status 'Umum' atau sesuai status_user
+            $barang = Barangs::where(function ($query) use ($user) {
+                $query->where('status_barang', 'Umum')
+                    ->orWhere('status_barang', $user->status_user);
+            })->get();
+
+            // Ruangan sesuai status_user
             $ruangan = Ruangans::where('deskripsi', $user->status_user)->get();
         }
 
@@ -231,6 +258,7 @@ class BarangMasukController extends Controller
 
         return view('barangmasuk.edit', compact('barangMasuk', 'barang', 'ruangan', 'barangRuangan'));
     }
+
 
 
 

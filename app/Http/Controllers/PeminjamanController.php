@@ -38,88 +38,87 @@ class PeminjamanController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        
+
         $keyword = $request->input('search');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $exportType = $request->input('export');
 
-        $query = Peminjamans::with(['barang', 'ruangan'])
-        ->where('status', 'Sedang Dipinjam')
-        ->when($keyword, function ($query) use ($keyword) {
-            $query->where(function ($q) use ($keyword) {
-                $q->whereHas('barang', function ($q2) use ($keyword) {
-                    $q2->where('nama', 'like', "%$keyword%")
-                       ->orWhere('merek', 'like', "%$keyword%")
-                       ->orWhere('status_barang', 'like', "%$keyword%");
-                })
-                ->orWhereHas('ruangan', function ($q2) use ($keyword) {
-                    $q2->where('nama_ruangan', 'like', "%$keyword%");
-                })
-                ->orWhereHas('user', function ($q2) use ($keyword) {
-                    $q2->where('name', 'like', "%$keyword%");
+        $query = Peminjamans::with(['barang', 'ruangan', 'user'])
+            ->where('status', 'Sedang Dipinjam')
+            ->when($keyword, function ($query) use ($keyword) {
+                $query->where(function ($q) use ($keyword) {
+                    $q->whereHas('barang', function ($q2) use ($keyword) {
+                        $q2->where('nama', 'like', "%$keyword%")
+                        ->orWhere('merek', 'like', "%$keyword%")
+                        ->orWhere('status_barang', 'like', "%$keyword%");
+                    })
+                    ->orWhereHas('ruangan', function ($q2) use ($keyword) {
+                        $q2->where('nama_ruangan', 'like', "%$keyword%")
+                        ->orWhere('deskripsi', 'like', "%$keyword%");
+                    })
+                    ->orWhereHas('user', function ($q2) use ($keyword) {
+                        $q2->where('name', 'like', "%$keyword%");
+                    });
                 });
-            });
-        })
-        ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-            $query->whereBetween('tanggal_pinjam', [$startDate, $endDate]);
-        })
-        ->when($startDate && !$endDate, function ($query) use ($startDate) {
-            $query->whereDate('tanggal_pinjam', '>=', $startDate);
-        })
-        ->when(!$startDate && $endDate, function ($query) use ($endDate) {
-            $query->whereDate('tanggal_pinjam', '<=', $endDate);
-        })
-        ->when($user->status_user !== 'admin', function ($query) use ($user) {
-            $query->whereHas('ruangan', function ($q) use ($user) {
-                $q->where(function ($q2) use ($user) {
-                $q2->Where('deskripsi', $user->status_user);
-                });
-            });
-        });
-    
-
-        // Mengecek jika ada permintaan untuk export
-        if ($exportType) {
-            $peminjaman = $query->get(); // Mengambil data yang sudah difilter
-
-            // Menambahkan 'tenggat' di sini sebelum export
-            $peminjaman->transform(function ($item) {
-                $now = Carbon::now(); // Ambil waktu sekarang
-                $tanggalKembali = Carbon::parse($item->tanggal_kembali); // Parse tanggal_kembali
-
-                // Cek jika status 'Sedang Dipinjam' dan tanggal sekarang lebih besar dari tanggal_kembali
-                if ($item->status === 'Sedang Dipinjam' && $now->gt($tanggalKembali)) {
-                    $item->tenggat = 'Terlambat';
+            })
+            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('tanggal_pinjam', [$startDate, $endDate]);
+            })
+            ->when($startDate && !$endDate, function ($query) use ($startDate) {
+                $query->whereDate('tanggal_pinjam', '>=', $startDate);
+            })
+            ->when(!$startDate && $endDate, function ($query) use ($endDate) {
+                $query->whereDate('tanggal_pinjam', '<=', $endDate);
+            })
+            ->when(strtolower($user->status_user) !== 'admin', function ($query) use ($user) {
+                if (strtolower($user->status_user) === 'umum') {
+                    // Hanya tampilkan peminjaman dari ruangan yang memiliki barang status 'Umum'
+                    $query->whereHas('barang', function ($q) {
+                        $q->where('status_barang', 'Umum');
+                    });
                 } else {
-                    $item->tenggat = 'Dalam Masa Pinjam';
+                    // Filter berdasarkan deskripsi ruangan yang sama dengan status user
+                    $query->whereHas('ruangan', function ($q) use ($user) {
+                        $q->where('deskripsi', $user->status_user);
+                    });
                 }
+            });
+
+        // EXPORT
+        if ($exportType) {
+            $peminjaman = $query->get();
+
+            $peminjaman->transform(function ($item) {
+                $now = Carbon::now();
+                $tanggalKembali = Carbon::parse($item->tanggal_kembali);
+
+                $item->tenggat = ($item->status === 'Sedang Dipinjam' && $now->gt($tanggalKembali))
+                    ? 'Terlambat'
+                    : 'Dalam Masa Pinjam';
 
                 return $item;
             });
 
-            if ($exportType == 'excel') {
+            if ($exportType === 'excel') {
                 return Excel::download(new PeminjamanExport($peminjaman), 'laporan-data-peminjaman.xlsx');
-            } elseif ($exportType == 'pdf') {
+            } elseif ($exportType === 'pdf') {
                 $pdf = Pdf::loadView('pdf.peminjaman', ['peminjaman' => $peminjaman]);
                 return $pdf->download('laporan-data-peminjaman.pdf');
             }
         }
 
-        // Jika tidak export, lakukan pagination dan tambahkan tenggat pada data yang ditampilkan
-        $peminjaman = $query->orderBy('id', 'desc')->paginate(10);
+        // PAGINATION
+        $peminjaman = $query->orderBy('id', 'desc')->paginate(10)->withQueryString();
 
-        // Menambahkan 'tenggat' di sini sebelum ditampilkan di view
+        // Tambahkan info tenggat untuk view
         $peminjaman->getCollection()->transform(function ($item) {
-            $now = Carbon::now(); // Ambil waktu sekarang
-            $tanggalKembali = Carbon::parse($item->tanggal_kembali); // Parse tanggal_kembali
+            $now = Carbon::now();
+            $tanggalKembali = Carbon::parse($item->tanggal_kembali);
 
-            // Cek jika status 'Sedang Dipinjam' dan tanggal sekarang lebih besar dari tanggal_kembali
-            if ($item->status === 'Sedang Dipinjam' && $now->gt($tanggalKembali)) {
-                $item->tenggat = 'Terlambat';
-            } else {
-                $item->tenggat = 'Dalam Masa Pinjam';
-            }
+            $item->tenggat = ($item->status === 'Sedang Dipinjam' && $now->gt($tanggalKembali))
+                ? 'Terlambat'
+                : 'Dalam Masa Pinjam';
 
             return $item;
         });
@@ -139,27 +138,38 @@ class PeminjamanController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil ID ruangan yang memiliki barang
-        $ruanganIdsWithBarang = BarangRuangans::distinct()->pluck('ruangan_id');
-
         // Ambil data barang sesuai status user
         if ($user->status_user === 'admin') {
             $barang = Barangs::all();
+        } elseif (strtolower($user->status_user) === 'umum') {
+            $barang = Barangs::where('status_barang', 'Umum')->get();
         } else {
             $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])->get();
         }
 
-        // Ambil ruangan yang memiliki barang dan sesuai status user
+        // Ambil ruangan sesuai status user dan isi barangnya
         if ($user->status_user === 'admin') {
-            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)->get();
+            $ruangan = Ruangans::whereHas('barangRuangan')->get();
+        } elseif (strtolower($user->status_user) === 'umum') {
+            // Khusus user umum, hanya ambil ruangan yang punya barang dengan status "Umum"
+            $ruangan = Ruangans::whereHas('barangRuangan', function ($query) {
+                $query->whereHas('barang', function ($q) {
+                    $q->where('status_barang', 'Umum');
+                });
+            })->get();
         } else {
-            $ruangan = Ruangans::whereIn('id', $ruanganIdsWithBarang)
-                        ->where('deskripsi', $user->status_user)
-                        ->get();
+            $ruangan = Ruangans::whereHas('barangRuangan', function ($query) use ($user) {
+                $query->whereHas('barang', function ($q) use ($user) {
+                    $q->whereIn('status_barang', ['Umum', $user->status_user]);
+                });
+            })
+            ->where('deskripsi', $user->status_user)
+            ->get();
         }
 
         return view('peminjaman.create', compact('barang', 'ruangan'));
     }
+
 
 
 
@@ -264,29 +274,33 @@ class PeminjamanController extends Controller
         // Ambil barang sesuai status user
         if ($user->status_user === 'admin') {
             $barang = Barangs::all();
+        } elseif (strtolower($user->status_user) === 'umum') {
+            $barang = Barangs::where('status_barang', 'Umum')->get();
         } else {
             $barang = Barangs::whereIn('status_barang', ['Umum', $user->status_user])->get();
         }
 
-        // Ambil ID barang yang sesuai
+        // Ambil ID barang sesuai dengan hasil filter
         $barangIds = $barang->pluck('id');
 
-        // Ambil ID ruangan yang memiliki barang-barang tersebut
-        $ruanganIdsWithBarang = BarangRuangans::whereIn('barang_id', $barangIds)
-                                ->distinct()
-                                ->pluck('ruangan_id');
-
-        // Ambil data ruangan yang memiliki barang sesuai status user
-        $ruanganQuery = Ruangans::whereIn('id', $ruanganIdsWithBarang);
-        
-        if ($user->status_user !== 'admin') {
-            $ruanganQuery->where('deskripsi', $user->status_user);
-        }
-
-        $ruangan = $ruanganQuery->get();
+        // Ambil ruangan yang memiliki barang-barang tersebut
+        $ruangan = Ruangans::whereHas('barangRuangan', function ($query) use ($barangIds) {
+            $query->whereIn('barang_id', $barangIds);
+        })
+        ->when($user->status_user === 'umum', function ($query) {
+            // Untuk user umum, hanya ambil ruangan dengan barang status 'Umum'
+            $query->whereHas('barangRuangan.barang', function ($q) {
+                $q->where('status_barang', 'Umum');
+            });
+        })
+        ->when($user->status_user !== 'admin' && strtolower($user->status_user) !== 'umum', function ($query) use ($user) {
+            $query->where('deskripsi', $user->status_user);
+        })
+        ->get();
 
         return view('peminjaman.edit', compact('peminjaman', 'barang', 'ruangan'));
     }
+
 
 
     
